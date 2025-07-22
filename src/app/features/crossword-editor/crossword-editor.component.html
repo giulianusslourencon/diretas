@@ -1,0 +1,86 @@
+<div class="crossword-editor-container">
+  @if (isLoading()) {
+    <div class="loading">
+      <p>Carregando...</p>
+    </div>
+  } @else if (crossword()) {
+    <header class="editor-header">
+      <div class="header-left">
+        <button class="btn btn-secondary" (click)="goBack()">
+          ← Voltar
+        </button>
+        <h1>{{ crossword()!.title }}</h1>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="saveCrossword()">
+          Salvar
+        </button>
+      </div>
+    </header>
+
+    <main class="editor-content">
+      <div class="grid-container">
+        <div class="crossword-grid">
+          @for (row of crossword()!.cells; track $index; let rowIndex = $index) {
+            <div class="grid-row">
+              @for (cell of row; track cell.id; let colIndex = $index) {
+                <div 
+                  class="grid-cell"
+                  [class.blocked]="cell.isBlocked"
+                  [class.numbered]="cell.number"
+                >
+                  @if (cell.number) {
+                    <span class="cell-number">{{ cell.number }}</span>
+                  }
+                  @if (!cell.isBlocked) {
+                    <input 
+                      type="text" 
+                      class="cell-input"
+                      maxlength="1"
+                      [(ngModel)]="cell.letter"
+                    >
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="tools-panel">
+          <h3>Ferramentas</h3>
+          <div class="tool-group">
+            <button class="tool-btn">Bloquear Célula</button>
+            <button class="tool-btn">Adicionar Palavra</button>
+            <button class="tool-btn">Numerar Automaticamente</button>
+          </div>
+        </div>
+
+        <div class="clues-panel">
+          <h3>Dicas</h3>
+          <div class="clues-section">
+            <h4>Horizontais</h4>
+            <div class="clues-list">
+              <!-- Clues will be added here -->
+              <p class="no-clues">Nenhuma dica horizontal ainda</p>
+            </div>
+          </div>
+          
+          <div class="clues-section">
+            <h4>Verticais</h4>
+            <div class="clues-list">
+              <!-- Clues will be added here -->
+              <p class="no-clues">Nenhuma dica vertical ainda</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  } @else {
+    <div class="error">
+      <p>Erro ao carregar a palavra cruzada.</p>
+      <button class="btn btn-primary" (click)="goBack()">Voltar</button>
+    </div>
+  }
+</div>
