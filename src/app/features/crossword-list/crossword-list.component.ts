@@ -9,7 +9,7 @@ import { CrosswordMetadata } from '../../core/models/crossword.model';
   selector: 'app-crossword-list',
   imports: [CommonModule, FormsModule],
   templateUrl: './crossword-list.component.html',
-  styleUrl: './crossword-list.component.scss'
+  styleUrl: './crossword-list.component.scss',
 })
 export class CrosswordListComponent {
   private readonly crosswordService = inject(CrosswordService);
@@ -18,8 +18,8 @@ export class CrosswordListComponent {
   readonly crosswords = this.crosswordService.crosswordList;
   readonly showNewCrosswordDialog = signal(false);
   readonly newCrosswordTitle = signal('');
-  readonly newCrosswordRows = signal(15);
-  readonly newCrosswordCols = signal(15);
+  readonly newCrosswordRows = signal(16);
+  readonly newCrosswordCols = signal(11);
 
   openNewCrosswordDialog(): void {
     this.showNewCrosswordDialog.set(true);
@@ -64,7 +64,7 @@ export class CrosswordListComponent {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
   }
 }

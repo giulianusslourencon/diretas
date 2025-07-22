@@ -1,86 +1,148 @@
 <div class="crossword-editor-container">
   @if (isLoading()) {
-    <div class="loading">
-      <p>Carregando...</p>
-    </div>
+  <div class="loading">
+    <p>Carregando...</p>
+  </div>
   } @else if (crossword()) {
-    <header class="editor-header">
-      <div class="header-left">
-        <button class="btn btn-secondary" (click)="goBack()">
-          ← Voltar
-        </button>
-        <h1>{{ crossword()!.title }}</h1>
-      </div>
-      <div class="header-right">
-        <button class="btn btn-primary" (click)="saveCrossword()">
-          Salvar
-        </button>
-      </div>
-    </header>
+  <header class="editor-header">
+    <div class="header-left">
+      <button class="btn btn-secondary" (click)="goBack()">← Voltar</button>
+      <h1>{{ crossword()!.title }}</h1>
+    </div>
+    <div class="header-right">
+      <button class="btn btn-primary" (click)="saveCrossword()">Salvar</button>
+    </div>
+  </header>
 
-    <main class="editor-content">
-      <div class="grid-container">
-        <div class="crossword-grid">
-          @for (row of crossword()!.cells; track $index; let rowIndex = $index) {
-            <div class="grid-row">
-              @for (cell of row; track cell.id; let colIndex = $index) {
-                <div 
-                  class="grid-cell"
-                  [class.blocked]="cell.isBlocked"
-                  [class.numbered]="cell.number"
-                >
-                  @if (cell.number) {
-                    <span class="cell-number">{{ cell.number }}</span>
-                  }
-                  @if (!cell.isBlocked) {
-                    <input 
-                      type="text" 
-                      class="cell-input"
-                      maxlength="1"
-                      [(ngModel)]="cell.letter"
-                    >
-                  }
-                </div>
+  <main class="editor-content">
+    <div class="grid-container">
+      <div class="crossword-grid">
+        @for (row of crossword()!.cells; track $index; let rowIndex = $index) {
+        <div class="grid-row">
+          @for (cell of row; track cell.id; let colIndex = $index) {
+          <div
+            class="grid-cell"
+            [class.clue-cell]="cell.isClueCell"
+            [class.horizontal-clue]="cell.clueDirection === 'horizontal'"
+            [class.vertical-clue]="cell.clueDirection === 'vertical'"
+            (click)="onCellClick(rowIndex, colIndex)"
+          >
+            @if (cell.isClueCell && cell.clueText) {
+            <!-- Clue cell with text and arrow -->
+            <div class="clue-content">
+              <div class="clue-text">{{ cell.clueText }}</div>
+              @if (cell.clueDirection === 'horizontal') {
+              <div class="clue-arrow horizontal">►</div>
+              } @else if (cell.clueDirection === 'vertical') {
+              <div class="clue-arrow vertical">▼</div>
               }
             </div>
+            } @else {
+            <!-- Regular answer cell -->
+            <input
+              type="text"
+              class="cell-input"
+              maxlength="1"
+              [(ngModel)]="cell.letter"
+              (focus)="onCellFocus(rowIndex, colIndex)"
+            />
+            }
+          </div>
           }
         </div>
+        }
       </div>
-
-      <div class="sidebar">
-        <div class="tools-panel">
-          <h3>Ferramentas</h3>
-          <div class="tool-group">
-            <button class="tool-btn">Bloquear Célula</button>
-            <button class="tool-btn">Adicionar Palavra</button>
-            <button class="tool-btn">Numerar Automaticamente</button>
-          </div>
-        </div>
-
-        <div class="clues-panel">
-          <h3>Dicas</h3>
-          <div class="clues-section">
-            <h4>Horizontais</h4>
-            <div class="clues-list">
-              <!-- Clues will be added here -->
-              <p class="no-clues">Nenhuma dica horizontal ainda</p>
-            </div>
-          </div>
-          
-          <div class="clues-section">
-            <h4>Verticais</h4>
-            <div class="clues-list">
-              <!-- Clues will be added here -->
-              <p class="no-clues">Nenhuma dica vertical ainda</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  } @else {
-    <div class="error">
-      <p>Erro ao carregar a palavra cruzada.</p>
-      <button class="btn btn-primary" (click)="goBack()">Voltar</button>
     </div>
+
+    <div class="sidebar">
+      <div class="tools-panel">
+        <h3>Ferramentas</h3>
+        <div class="tool-group">
+          <button
+            class="tool-btn"
+            [class.active]="currentTool() === 'clue-horizontal'"
+            (click)="setTool('clue-horizontal')"
+          >
+            ► Dica Horizontal
+          </button>
+          <button
+            class="tool-btn"
+            [class.active]="currentTool() === 'clue-vertical'"
+            (click)="setTool('clue-vertical')"
+          >
+            ▼ Dica Vertical
+          </button>
+          <button
+            class="tool-btn"
+            [class.active]="currentTool() === 'clear'"
+            (click)="setTool('clear')"
+          >
+            🗑️ Limpar Célula
+          </button>
+        </div>
+      </div>
+
+      @if (selectedCell()) {
+      <div class="cell-editor-panel">
+        <h3>
+          Editar Célula ({{ selectedCell()!.row + 1 }},
+          {{ selectedCell()!.col + 1 }})
+        </h3>
+
+        @if (selectedCell()!.isClueCell) {
+        <div class="clue-editor">
+          <label for="clue-text">Texto da Dica:</label>
+          <textarea
+            id="clue-text"
+            [(ngModel)]="selectedCell()!.clueText"
+            placeholder="Digite a dica aqui..."
+            rows="3"
+          ></textarea>
+
+          <label for="clue-direction">Direção:</label>
+          <select
+            id="clue-direction"
+            [(ngModel)]="selectedCell()!.clueDirection"
+          >
+            <option value="horizontal">Horizontal ►</option>
+            <option value="vertical">Vertical ▼</option>
+          </select>
+        </div>
+        }
+
+        <div class="cell-actions">
+          <button class="btn btn-secondary" (click)="clearSelectedCell()">
+            Limpar
+          </button>
+          <button class="btn btn-primary" (click)="saveChanges()">
+            Salvar
+          </button>
+        </div>
+      </div>
+      }
+
+      <div class="info-panel">
+        <h3>Instruções</h3>
+        <div class="instructions">
+          <p><strong>Como usar:</strong></p>
+          <ul>
+            <li>Clique em uma célula para selecioná-la</li>
+            <li>
+              Use as ferramentas para adicionar dicas horizontais (►) ou
+              verticais (▼)
+            </li>
+            <li>Dicas são colocadas diretamente na grade (estilo Diretas)</li>
+            <li>Células restantes são preenchidas com as respostas</li>
+            <li>Não há células bloqueadas - toda a grade é utilizável</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+  } @else {
+  <div class="error">
+    <p>Erro ao carregar a palavra cruzada.</p>
+    <button class="btn btn-primary" (click)="goBack()">Voltar</button>
+  </div>
   }
 </div>

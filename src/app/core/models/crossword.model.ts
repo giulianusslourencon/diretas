@@ -3,11 +3,10 @@ export interface CrosswordCell {
   row: number;
   col: number;
   letter: string;
-  isBlocked: boolean;
-  number?: number;
-  isStartOfWord: boolean;
-  clueHorizontal?: string;
-  clueVertical?: string;
+  isClueCell: boolean;
+  clueText?: string;
+  clueDirection?: 'horizontal' | 'vertical';
+  wordId?: string;
 }
 
 export interface CrosswordWord {

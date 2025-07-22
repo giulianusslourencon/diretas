@@ -1,25 +1,33 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { CrosswordGrid, CrosswordMetadata, CrosswordCell, CrosswordWord } from '../models/crossword.model';
+import {
+  CrosswordGrid,
+  CrosswordMetadata,
+  CrosswordCell,
+  CrosswordWord,
+} from '../models/crossword.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class CrosswordService {
   private readonly STORAGE_KEY = 'diretas-crosswords';
-  
+
   private crosswords = signal<CrosswordGrid[]>([]);
-  
-  readonly crosswordList = computed(() => 
-    this.crosswords().map(cw => ({
-      id: cw.id,
-      title: cw.title,
-      description: cw.description,
-      rows: cw.rows,
-      cols: cw.cols,
-      wordCount: cw.words.length,
-      createdAt: cw.createdAt,
-      updatedAt: cw.updatedAt
-    } as CrosswordMetadata))
+
+  readonly crosswordList = computed(() =>
+    this.crosswords().map(
+      (cw) =>
+        ({
+          id: cw.id,
+          title: cw.title,
+          description: cw.description,
+          rows: cw.rows,
+          cols: cw.cols,
+          wordCount: cw.words.length,
+          createdAt: cw.createdAt,
+          updatedAt: cw.updatedAt,
+        } as CrosswordMetadata)
+    )
   );
 
   constructor() {
@@ -29,7 +37,7 @@ export class CrosswordService {
   createNewCrossword(title: string, rows: number, cols: number): CrosswordGrid {
     const id = this.generateId();
     const now = new Date();
-    
+
     const cells: CrosswordCell[][] = [];
     for (let row = 0; row < rows; row++) {
       cells[row] = [];
@@ -39,8 +47,10 @@ export class CrosswordService {
           row,
           col,
           letter: '',
-          isBlocked: false,
-          isStartOfWord: false
+          isClueCell: false,
+          clueText: '',
+          clueDirection: undefined,
+          wordId: undefined,
         };
       }
     }
@@ -53,34 +63,34 @@ export class CrosswordService {
       cells,
       words: [],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
 
-    this.crosswords.update(crosswords => [...crosswords, crossword]);
+    this.crosswords.update((crosswords) => [...crosswords, crossword]);
     this.saveToStorage();
-    
+
     return crossword;
   }
 
   getCrosswordById(id: string): CrosswordGrid | undefined {
-    return this.crosswords().find(cw => cw.id === id);
+    return this.crosswords().find((cw) => cw.id === id);
   }
 
   updateCrossword(crossword: CrosswordGrid): void {
     crossword.updatedAt = new Date();
-    
-    this.crosswords.update(crosswords => 
-      crosswords.map(cw => cw.id === crossword.id ? crossword : cw)
+
+    this.crosswords.update((crosswords) =>
+      crosswords.map((cw) => (cw.id === crossword.id ? crossword : cw))
     );
-    
+
     this.saveToStorage();
   }
 
   deleteCrossword(id: string): void {
-    this.crosswords.update(crosswords => 
-      crosswords.filter(cw => cw.id !== id)
+    this.crosswords.update((crosswords) =>
+      crosswords.filter((cw) => cw.id !== id)
     );
-    
+
     this.saveToStorage();
   }
 
@@ -95,7 +105,7 @@ export class CrosswordService {
         const crosswords = JSON.parse(stored).map((cw: any) => ({
           ...cw,
           createdAt: new Date(cw.createdAt),
-          updatedAt: new Date(cw.updatedAt)
+          updatedAt: new Date(cw.updatedAt),
         }));
         this.crosswords.set(crosswords);
       }
