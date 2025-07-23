@@ -1,0 +1,101 @@
+<div
+  class="grid-cell"
+  [class.clue-cell]="cell().isClueCell"
+  [class.split-cell]="cell().isSplitCell"
+  [class.horizontal-clue]="cell().clueDirection === 'horizontal'"
+  [class.vertical-clue]="cell().clueDirection === 'vertical'"
+  [class.active-triangle]="isActiveTriangleCell()"
+  [attr.data-cell]="rowIndex() + '-' + colIndex()"
+  (click)="onCellClick()"
+  (contextmenu)="onCellRightClick($event)"
+>
+  @if (cell().isSplitCell) {
+    <!-- Split cell with two letter triangles -->
+    <div
+      class="split-cell-content"
+      [attr.data-diagonal]="cell().diagonalDirection || 'main'"
+    >
+      <div class="diagonal-line"></div>
+      <div
+        class="triangle top-triangle"
+        (click)="onTriangleClick('top', $event)"
+      >
+        @if (isTriangleActive('top')) {
+          <!-- Editing mode for top triangle -->
+          <input
+            type="text"
+            class="triangle-input"
+            maxlength="1"
+            [(ngModel)]="cell().topLetter"
+            (blur)="onTriangleBlur()"
+            (keydown)="onTriangleKeydown($event, 'top')"
+            #topInput
+          />
+        } @else {
+          <!-- Display mode for top triangle -->
+          <span class="triangle-letter">
+            {{ cell().topLetter || "" }}
+          </span>
+        }
+      </div>
+      <div
+        class="triangle bottom-triangle"
+        (click)="onTriangleClick('bottom', $event)"
+      >
+        @if (isTriangleActive('bottom')) {
+          <!-- Editing mode for bottom triangle -->
+          <input
+            type="text"
+            class="triangle-input"
+            maxlength="1"
+            [(ngModel)]="cell().bottomLetter"
+            (blur)="onTriangleBlur()"
+            (keydown)="onTriangleKeydown($event, 'bottom')"
+            #bottomInput
+          />
+        } @else {
+          <!-- Display mode for bottom triangle -->
+          <span class="triangle-letter">
+            {{ cell().bottomLetter || "" }}
+          </span>
+        }
+      </div>
+    </div>
+  } @else if (cell().isClueCell) {
+    <!-- Clue cell with editable text -->
+    <div class="clue-content">
+      @if (isSelected()) {
+        <!-- Editing mode -->
+        <input
+          type="text"
+          class="clue-input"
+          [(ngModel)]="cell().clueText"
+          placeholder="Digite a dica..."
+          (blur)="onClueInputBlur()"
+          (keydown.enter)="onClueInputBlur()"
+          (keydown.escape)="onClueInputBlur()"
+          #clueInput
+        />
+      } @else {
+        <!-- Display mode -->
+        <div class="clue-text">
+          {{ cell().clueText || "Clique para editar" }}
+        </div>
+      }
+      @if (cell().clueDirection === 'horizontal') {
+        <div class="clue-arrow horizontal">►</div>
+      } @else if (cell().clueDirection === 'vertical') {
+        <div class="clue-arrow vertical">▼</div>
+      }
+    </div>
+  } @else {
+    <!-- Regular answer cell -->
+    <input
+      type="text"
+      class="cell-input"
+      maxlength="1"
+      [(ngModel)]="cell().letter"
+      (focus)="onCellFocus()"
+    />
+  }
+</div>

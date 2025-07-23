@@ -1,0 +1,429 @@
+.grid-cell {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #333;
+  position: relative;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+
+  &:hover {
+    background: #f8f9fa;
+    box-shadow: inset 0 0 0 1px #3498db;
+  }
+
+  // Add a subtle indicator for right-click functionality
+  &::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 4px;
+    height: 4px;
+    background: #bdc3c7;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  &:hover::after {
+    opacity: 0.6;
+  }
+
+  &.clue-cell {
+    background: #fff9c4;
+
+    &:hover {
+      background: #fff3a0;
+    }
+
+    // Use pseudo-elements for colored indicators instead of borders
+    &.horizontal-clue::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: #e74c3c;
+      z-index: 1;
+    }
+
+    &.vertical-clue::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 4px;
+      background: #3498db;
+      z-index: 1;
+    }
+  }
+
+  &.split-cell {
+    background: #f0f8ff;
+
+    &:hover {
+      background: #e6f3ff;
+    }
+
+    &.active-triangle {
+      box-shadow: inset 0 0 0 2px #3498db;
+    }
+  }
+}
+
+.clue-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2px;
+  position: relative;
+
+  .clue-text {
+    font-size: 8px;
+    line-height: 1.1;
+    text-align: center;
+    color: #2c3e50;
+    font-weight: 500;
+    word-wrap: break-word;
+    overflow: hidden;
+    max-height: 45px;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(52, 152, 219, 0.1);
+      border-radius: 2px;
+    }
+  }
+
+  .clue-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: white;
+    font-size: 8px;
+    font-weight: 500;
+    color: #2c3e50;
+    text-align: center;
+    padding: 2px;
+    box-sizing: border-box;
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 2px #3498db;
+    resize: none;
+
+    &::placeholder {
+      color: #95a5a6;
+      font-weight: normal;
+    }
+  }
+
+  .clue-arrow {
+    position: absolute;
+    font-size: 10px;
+    font-weight: bold;
+    pointer-events: none;
+
+    &.horizontal {
+      bottom: 2px;
+      right: 2px;
+      color: #e74c3c;
+    }
+
+    &.vertical {
+      top: 2px;
+      right: 2px;
+      color: #3498db;
+    }
+  }
+}
+
+.cell-input {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  text-transform: uppercase;
+  background: transparent;
+
+  &:focus {
+    background: #e3f2fd;
+    box-shadow: inset 0 0 0 2px #3498db;
+  }
+}
+
+.split-cell-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  .diagonal-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 141.42%; // sqrt(2) * 100% to cover diagonal
+      height: 2px;
+      background: #2c3e50;
+      transform: rotate(45deg);
+      transform-origin: 0 0;
+    }
+  }
+
+  // Anti-diagonal (top-right to bottom-left)
+  &[data-diagonal="anti"] {
+    .diagonal-line::before {
+      top: 0;
+      right: 0;
+      left: auto;
+      transform: rotate(-45deg);
+      transform-origin: 100% 0;
+    }
+
+    .top-triangle {
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+    }
+
+    .bottom-triangle {
+      clip-path: polygon(0 0, 0 100%, 100% 100%);
+    }
+  }
+
+  // Triângulos para diagonal PRINCIPAL (main)
+  &[data-diagonal="main"] .triangle {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    z-index: 5;
+    overflow: hidden;
+
+    &.top-triangle {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 0, 100% 0, 100% 100%);
+
+      &:hover {
+        background: rgba(52, 152, 219, 0.1);
+      }
+    }
+
+    &.bottom-triangle {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 0, 0 100%, 100% 100%);
+
+      &:hover {
+        background: rgba(52, 152, 219, 0.1);
+      }
+    }
+  }
+
+  // Triângulos para diagonal ANTI
+  &[data-diagonal="anti"] .triangle {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    z-index: 5;
+    overflow: hidden;
+
+    &.top-triangle {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+
+      &:hover {
+        background: rgba(52, 152, 219, 0.1);
+      }
+    }
+
+    &.bottom-triangle {
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+
+      &:hover {
+        background: rgba(52, 152, 219, 0.1);
+      }
+    }
+  }
+
+  .triangle-letter {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #2c3e50;
+    z-index: 10;
+    text-align: center;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(52, 152, 219, 0.2);
+      border-radius: 2px;
+    }
+  }
+
+  .triangle-input {
+    width: 24px;
+    height: 24px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.95);
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #2c3e50;
+    text-align: center;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 2px #3498db;
+    z-index: 15;
+    position: absolute;
+
+    &::placeholder {
+      color: #95a5a6;
+      font-weight: normal;
+    }
+  }
+}
+
+// Split cell diagonal direction styles
+.split-cell-content[data-diagonal="main"] {
+  .top-triangle {
+    .triangle-letter {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+
+      line-height: 1;
+    }
+  }
+
+  .bottom-triangle {
+    .triangle-letter {
+      position: absolute;
+      bottom: 8px;
+      left: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+
+      line-height: 1;
+    }
+  }
+}
+
+.split-cell-content[data-diagonal="anti"] {
+  .diagonal-line::before {
+    top: 0;
+    right: 0;
+    left: auto;
+    transform: rotate(-45deg);
+    transform-origin: 100% 0;
+  }
+
+  .top-triangle {
+    .triangle-letter {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+    }
+  }
+
+  .bottom-triangle {
+    .triangle-letter {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+    }
+  }
+}
+
+// Input positioning for both diagonal directions
+.split-cell-content[data-diagonal="main"] {
+  .top-triangle .triangle-input {
+    top: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid #3498db;
+  }
+
+  .bottom-triangle .triangle-input {
+    bottom: 5px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid #3498db;
+  }
+}
+
+.split-cell-content[data-diagonal="anti"] {
+  .top-triangle .triangle-input {
+    top: 5px;
+    left: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid #3498db;
+  }
+
+  .bottom-triangle .triangle-input {
+    bottom: 5px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    font-size: 24px;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 1);
+    border: 2px solid #3498db;
+  }
+}

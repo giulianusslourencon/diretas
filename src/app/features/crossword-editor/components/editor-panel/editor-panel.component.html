@@ -1,0 +1,120 @@
+<div class="sidebar">
+  @if (selectedCell()) {
+    <div class="cell-editor-panel">
+      <h3>
+        Editar Célula ({{ selectedCell()!.row + 1 }},
+        {{ selectedCell()!.col + 1 }})
+      </h3>
+
+      @if (selectedCell()!.isSplitCell) {
+        <div class="split-cell-editor">
+          <h4>Célula Dividida - Duas Letras</h4>
+
+          <div class="usage-tip">
+            <p><strong>💡 Como usar:</strong></p>
+            <ul>
+              <li>Clique no triângulo superior ou inferior</li>
+              <li>Digite uma letra diretamente</li>
+              <li>Use setas para navegar entre triângulos</li>
+              <li>Tab para ir ao próximo triângulo</li>
+            </ul>
+          </div>
+
+          <div class="letter-editor">
+            <label for="top-letter">
+              🔺 Letra Superior:
+              <span class="current-letter">{{
+                selectedCell()!.topLetter || "(vazio)"
+              }}</span>
+            </label>
+            <input
+              id="top-letter"
+              type="text"
+              [(ngModel)]="selectedCell()!.topLetter"
+              placeholder="Clique no triângulo superior na grade"
+              maxlength="1"
+              class="letter-input"
+              readonly
+            />
+          </div>
+
+          <div class="letter-editor">
+            <label for="bottom-letter">
+              🔻 Letra Inferior:
+              <span class="current-letter">{{
+                selectedCell()!.bottomLetter || "(vazio)"
+              }}</span>
+            </label>
+            <input
+              id="bottom-letter"
+              type="text"
+              [(ngModel)]="selectedCell()!.bottomLetter"
+              placeholder="Clique no triângulo inferior na grade"
+              maxlength="1"
+              class="letter-input"
+              readonly
+            />
+          </div>
+        </div>
+      } @else if (selectedCell()!.isClueCell) {
+        <div class="clue-editor">
+          <label for="clue-text">Texto da Dica:</label>
+          <textarea
+            id="clue-text"
+            [(ngModel)]="selectedCell()!.clueText"
+            placeholder="Digite a dica aqui..."
+            rows="3"
+          ></textarea>
+
+          <label for="clue-direction">Direção:</label>
+          <select
+            id="clue-direction"
+            [(ngModel)]="selectedCell()!.clueDirection"
+          >
+            <option value="horizontal">Horizontal ►</option>
+            <option value="vertical">Vertical ▼</option>
+          </select>
+        </div>
+      }
+
+      <div class="cell-actions">
+        <button class="btn btn-secondary" (click)="onClearCell()">
+          Limpar
+        </button>
+        <button class="btn btn-primary" (click)="onSaveChanges()">
+          Salvar
+        </button>
+      </div>
+    </div>
+  }
+
+  <div class="info-panel">
+    <h3>Instruções</h3>
+    <div class="instructions">
+      <p><strong>Como usar:</strong></p>
+      <ul>
+        <li>
+          <strong>Clique esquerdo:</strong> Selecionar célula para edição
+        </li>
+        <li><strong>Clique direito:</strong> Alternar tipo de célula</li>
+        <li><strong>Tipos de célula:</strong></li>
+        <ul>
+          <li>🔲 Regular - Para respostas</li>
+          <li>► Dica Horizontal - Clique para editar texto</li>
+          <li>▼ Dica Vertical - Clique para editar texto</li>
+          <li>⧄ Célula Dividida - Duas letras</li>
+        </ul>
+        <li>
+          <strong>Edição de dicas:</strong> Clique na célula de dica para
+          digitar
+        </li>
+        <li>
+          <strong>Células divididas:</strong> Clique nos triângulos para
+          digitar letras (suporta ambas direções diagonais)
+        </li>
+        <li>Dicas são colocadas diretamente na grade (estilo Diretas)</li>
+        <li>Não há células bloqueadas - toda a grade é utilizável</li>
+      </ul>
+    </div>
+  </div>
+</div>

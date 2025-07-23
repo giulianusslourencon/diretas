@@ -10,6 +10,7 @@ export interface CrosswordCell {
   // For split cells - two letters in diagonal triangles
   topLetter?: string; // Letter in top triangle
   bottomLetter?: string; // Letter in bottom triangle
+  diagonalDirection?: 'main' | 'anti'; // main: top-left to bottom-right, anti: top-right to bottom-left
   wordId?: string;
 }
 

@@ -1,20 +1,32 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import {
+  Component,
+  inject,
+  signal,
+  OnInit,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { CrosswordService } from '../../core/services/crossword.service';
 import {
   CrosswordGrid,
   CrosswordCell,
 } from '../../core/models/crossword.model';
-
-type CellType = 'regular' | 'clue-horizontal' | 'clue-vertical' | 'split-cell';
+import { CrosswordGridComponent, EditorPanelComponent } from './components';
+import {
+  ActiveTriangle,
+  CellClickEvent,
+  CellRightClickEvent,
+  TriangleClickEvent,
+  TriangleKeydownEvent,
+} from './types/editor.types';
 
 @Component({
   selector: 'app-crossword-editor',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, CrosswordGridComponent, EditorPanelComponent],
   templateUrl: './crossword-editor.component.html',
   styleUrl: './crossword-editor.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CrosswordEditorComponent implements OnInit {
   private readonly crosswordService = inject(CrosswordService);
@@ -24,11 +36,7 @@ export class CrosswordEditorComponent implements OnInit {
   readonly crossword = signal<CrosswordGrid | null>(null);
   readonly isLoading = signal(true);
   readonly selectedCell = signal<CrosswordCell | null>(null);
-  readonly activeTriangle = signal<{
-    row: number;
-    col: number;
-    triangle: 'top' | 'bottom';
-  } | null>(null);
+  readonly activeTriangle = signal<ActiveTriangle | null>(null);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -54,25 +62,30 @@ export class CrosswordEditorComponent implements OnInit {
     this.isLoading.set(false);
   }
 
-  onCellClick(row: number, col: number): void {
+  onCellClick(data: CellClickEvent): void {
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
+
+    // Auto-focus clue input if it's a clue cell
+    if (cell.isClueCell) {
+      this.focusClueInput();
+    }
   }
 
-  onCellRightClick(event: MouseEvent, row: number, col: number): void {
-    event.preventDefault(); // Prevent context menu
+  onCellRightClick(data: CellRightClickEvent): void {
+    data.event.preventDefault(); // Prevent context menu
 
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
 
     // Cycle through cell types: regular -> horizontal clue -> vertical clue -> split cell -> regular
-    this.cycleCellType(row, col);
+    this.cycleCellType(data.row, data.col);
   }
 
   private cycleCellType(row: number, col: number): void {
@@ -88,20 +101,23 @@ export class CrosswordEditorComponent implements OnInit {
       // Horizontal clue -> Vertical clue
       this.setClueCell(row, col, 'vertical');
     } else if (cell.isClueCell && cell.clueDirection === 'vertical') {
-      // Vertical clue -> Split cell
+      // Vertical clue -> Split cell (main diagonal)
       this.clearCell(row, col);
-      this.toggleSplitCell(row, col);
-    } else if (cell.isSplitCell) {
-      // Split cell -> Regular cell
+      this.toggleSplitCell(row, col, 'main');
+    } else if (cell.isSplitCell && cell.diagonalDirection === 'main') {
+      // Split cell (main diagonal) -> Split cell (anti diagonal)
+      this.toggleSplitCell(row, col, 'anti');
+    } else if (cell.isSplitCell && cell.diagonalDirection === 'anti') {
+      // Split cell (anti diagonal) -> Regular cell
       this.clearCell(row, col);
     }
   }
 
-  onCellFocus(row: number, col: number): void {
+  onCellFocus(data: CellClickEvent): void {
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
   }
 
@@ -126,27 +142,31 @@ export class CrosswordEditorComponent implements OnInit {
     this.crossword.set({ ...crossword });
   }
 
-  private toggleSplitCell(row: number, col: number): void {
+  private toggleSplitCell(
+    row: number,
+    col: number,
+    direction: 'main' | 'anti' = 'main'
+  ): void {
     const crossword = this.crossword();
     if (!crossword) return;
 
     const cell = crossword.cells[row][col];
-    cell.isSplitCell = !cell.isSplitCell;
 
-    if (cell.isSplitCell) {
-      // Initialize split cell for two letters
+    if (!cell.isSplitCell) {
+      // Convert to split cell
+      cell.isSplitCell = true;
       cell.isClueCell = false;
       cell.letter = '';
       cell.clueText = '';
       cell.clueDirection = undefined;
 
-      // Initialize with empty letters
+      // Initialize with empty letters and set diagonal direction
       cell.topLetter = '';
       cell.bottomLetter = '';
+      cell.diagonalDirection = direction;
     } else {
-      // Clear split cell data
-      cell.topLetter = '';
-      cell.bottomLetter = '';
+      // Just change the diagonal direction
+      cell.diagonalDirection = direction;
     }
 
     this.crossword.set({ ...crossword });
@@ -164,6 +184,7 @@ export class CrosswordEditorComponent implements OnInit {
     cell.clueDirection = undefined;
     cell.topLetter = '';
     cell.bottomLetter = '';
+    cell.diagonalDirection = undefined;
 
     this.crossword.set({ ...crossword });
   }
@@ -187,47 +208,29 @@ export class CrosswordEditorComponent implements OnInit {
     this.router.navigate(['/crosswords']);
   }
 
-  saveCrossword(): void {
-    this.saveChanges();
-  }
-
-  focusTriangle(
-    row: number,
-    col: number,
-    triangle: 'top' | 'bottom',
-    event: Event
-  ): void {
-    event.stopPropagation();
+  onTriangleClick(data: TriangleClickEvent): void {
+    data.event.stopPropagation();
 
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
-    this.activeTriangle.set({ row, col, triangle });
+    this.activeTriangle.set({
+      row: data.row,
+      col: data.col,
+      triangle: data.triangle,
+    });
 
-    // Focus the appropriate hidden input
-    setTimeout(() => {
-      const inputs = document.querySelectorAll('.hidden-input');
-      const targetInput =
-        triangle === 'top'
-          ? (inputs[0] as HTMLInputElement)
-          : (inputs[1] as HTMLInputElement);
-      if (targetInput) {
-        targetInput.focus();
-        targetInput.select();
-      }
-    }, 0);
+    // Auto-focus the triangle input field
+    this.focusTriangleInput();
   }
 
-  onTriangleKeydown(
-    event: KeyboardEvent,
-    row: number,
-    col: number,
-    triangle: 'top' | 'bottom'
-  ): void {
+  onTriangleKeydown(data: TriangleKeydownEvent): void {
     const crossword = this.crossword();
     if (!crossword) return;
+
+    const { event, row, col, triangle } = data;
 
     if (event.key.length === 1 && event.key.match(/[a-zA-Z]/)) {
       // Letter input
@@ -243,8 +246,11 @@ export class CrosswordEditorComponent implements OnInit {
       this.crossword.set({ ...crossword });
       event.preventDefault();
 
-      // Move to next triangle or cell
-      this.moveToNextTriangle(row, col, triangle);
+      // Simple navigation: move to bottom triangle if on top, otherwise stay
+      if (triangle === 'top') {
+        this.activeTriangle.set({ row, col, triangle: 'bottom' });
+        this.focusTriangleInput();
+      }
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       // Clear current triangle
       const cell = crossword.cells[row][col];
@@ -263,140 +269,55 @@ export class CrosswordEditorComponent implements OnInit {
       event.key === 'ArrowLeft' ||
       event.key === 'ArrowRight'
     ) {
-      // Navigation
-      this.handleTriangleNavigation(event, row, col, triangle);
+      // Simple arrow navigation - just prevent default
+      event.preventDefault();
     } else if (event.key === 'Tab') {
       // Tab to next triangle
       event.preventDefault();
-      this.moveToNextTriangle(row, col, triangle);
-    }
-  }
-
-  private moveToNextTriangle(
-    row: number,
-    col: number,
-    currentTriangle: 'top' | 'bottom'
-  ): void {
-    const crossword = this.crossword();
-    if (!crossword) return;
-
-    if (currentTriangle === 'top') {
-      // Move to bottom triangle of same cell
-      this.focusTriangleByPosition(row, col, 'bottom');
-    } else {
-      // Move to next split cell or create new one
-      this.findNextSplitCell(row, col);
-    }
-  }
-
-  private handleTriangleNavigation(
-    event: KeyboardEvent,
-    row: number,
-    col: number,
-    triangle: 'top' | 'bottom'
-  ): void {
-    const crossword = this.crossword();
-    if (!crossword) return;
-
-    let newRow = row;
-    let newCol = col;
-    let newTriangle = triangle;
-
-    switch (event.key) {
-      case 'ArrowUp':
-        if (triangle === 'bottom') {
-          newTriangle = 'top';
-        } else {
-          newRow = Math.max(0, row - 1);
-        }
-        break;
-      case 'ArrowDown':
-        if (triangle === 'top') {
-          newTriangle = 'bottom';
-        } else {
-          newRow = Math.min(crossword.rows - 1, row + 1);
-        }
-        break;
-      case 'ArrowLeft':
-        newCol = Math.max(0, col - 1);
-        break;
-      case 'ArrowRight':
-        newCol = Math.min(crossword.cols - 1, col + 1);
-        break;
-    }
-
-    event.preventDefault();
-
-    // If moving to a different cell, check if it's a split cell
-    if (newRow !== row || newCol !== col) {
-      const targetCell = crossword.cells[newRow][newCol];
-      if (targetCell.isSplitCell) {
-        this.focusTriangleByPosition(newRow, newCol, newTriangle);
-      } else {
-        // Focus regular cell
-        this.onCellFocus(newRow, newCol);
+      if (triangle === 'top') {
+        this.activeTriangle.set({ row, col, triangle: 'bottom' });
+        this.focusTriangleInput();
       }
-    } else {
-      // Same cell, different triangle
-      this.focusTriangleByPosition(newRow, newCol, newTriangle);
     }
   }
 
-  private focusTriangleByPosition(
-    row: number,
-    col: number,
-    triangle: 'top' | 'bottom'
-  ): void {
-    const crossword = this.crossword();
-    if (!crossword) return;
-
-    const cell = crossword.cells[row][col];
-    this.selectedCell.set(cell);
-    this.activeTriangle.set({ row, col, triangle });
-
-    // Focus the appropriate input
+  onTriangleBlur(): void {
+    // Clear active triangle when input loses focus
     setTimeout(() => {
-      const cellElement = document.querySelector(`[data-cell="${row}-${col}"]`);
-      if (cellElement) {
-        const inputs = cellElement.querySelectorAll('.hidden-input');
-        const targetInput =
-          triangle === 'top'
-            ? (inputs[0] as HTMLInputElement)
-            : (inputs[1] as HTMLInputElement);
-        if (targetInput) {
-          targetInput.focus();
-          targetInput.select();
-        }
+      if (!document.activeElement?.classList.contains('triangle-input')) {
+        this.activeTriangle.set(null);
+        this.selectedCell.set(null);
+      }
+    }, 100);
+  }
+
+  onClueInputBlur(): void {
+    // Simply deselect the cell when input loses focus
+    this.selectedCell.set(null);
+  }
+
+  // Helper methods
+  private focusClueInput(): void {
+    setTimeout(() => {
+      const clueInput = document.querySelector(
+        '.clue-input'
+      ) as HTMLInputElement;
+      if (clueInput) {
+        clueInput.focus();
+        clueInput.select();
       }
     }, 0);
   }
 
-  private findNextSplitCell(startRow: number, startCol: number): void {
-    const crossword = this.crossword();
-    if (!crossword) return;
-
-    // Look for next split cell in reading order
-    for (let row = startRow; row < crossword.rows; row++) {
-      const startColForRow = row === startRow ? startCol + 1 : 0;
-      for (let col = startColForRow; col < crossword.cols; col++) {
-        const cell = crossword.cells[row][col];
-        if (cell.isSplitCell) {
-          this.focusTriangleByPosition(row, col, 'top');
-          return;
-        }
-      }
-    }
-
-    // If no split cell found, focus first regular cell
-    this.onCellFocus(0, 0);
-  }
-
-  onTriangleBlur(): void {
-    // Keep the active triangle for a short time to allow for navigation
+  private focusTriangleInput(): void {
     setTimeout(() => {
-      if (!document.activeElement?.classList.contains('hidden-input')) {
-        this.activeTriangle.set(null);
+      const input = document.querySelector(
+        '.triangle-input'
+      ) as HTMLInputElement;
+      if (input) {
+        input.focus();
+        input.select();
       }
-    }, 100);
+    }, 0);
   }
 }
