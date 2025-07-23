@@ -84,7 +84,7 @@ export class CrosswordEditorComponent implements OnInit {
     const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
 
-    // Cycle through cell types: regular -> horizontal clue -> vertical clue -> split cell -> regular
+    // Cycle through cell types: regular -> horizontal clue -> vertical clue -> up clue -> left clue -> split cell -> regular
     this.cycleCellType(data.row, data.col);
   }
 
@@ -101,7 +101,13 @@ export class CrosswordEditorComponent implements OnInit {
       // Horizontal clue -> Vertical clue
       this.setClueCell(row, col, 'vertical');
     } else if (cell.isClueCell && cell.clueDirection === 'vertical') {
-      // Vertical clue -> Split cell (main diagonal)
+      // Vertical clue -> Up clue
+      this.setClueCell(row, col, 'up');
+    } else if (cell.isClueCell && cell.clueDirection === 'up') {
+      // Up clue -> Left clue
+      this.setClueCell(row, col, 'left');
+    } else if (cell.isClueCell && cell.clueDirection === 'left') {
+      // Left clue -> Split cell (main diagonal)
       this.clearCell(row, col);
       this.toggleSplitCell(row, col, 'main');
     } else if (cell.isSplitCell && cell.diagonalDirection === 'main') {
@@ -124,7 +130,7 @@ export class CrosswordEditorComponent implements OnInit {
   private setClueCell(
     row: number,
     col: number,
-    direction: 'horizontal' | 'vertical'
+    direction: 'horizontal' | 'vertical' | 'up' | 'left'
   ): void {
     const crossword = this.crossword();
     if (!crossword) return;

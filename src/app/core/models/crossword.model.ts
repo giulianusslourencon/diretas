@@ -6,7 +6,7 @@ export interface CrosswordCell {
   isClueCell: boolean;
   isSplitCell: boolean;
   clueText?: string;
-  clueDirection?: 'horizontal' | 'vertical';
+  clueDirection?: 'horizontal' | 'vertical' | 'up' | 'left';
   // For split cells - two letters in diagonal triangles
   topLetter?: string; // Letter in top triangle
   bottomLetter?: string; // Letter in bottom triangle

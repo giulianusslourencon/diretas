@@ -7,6 +7,8 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
 
   &:hover {
     background: #f8f9fa;
@@ -32,10 +34,10 @@
   }
 
   &.clue-cell {
-    background: #fff9c4;
+    background: white;
 
     &:hover {
-      background: #fff3a0;
+      background: #f8f9fa;
     }
 
     // Use pseudo-elements for colored indicators instead of borders
@@ -44,9 +46,9 @@
       position: absolute;
       left: 0;
       top: 0;
-      width: 4px;
+      width: 2px;
       height: 100%;
-      background: #e74c3c;
+      background: #666;
       z-index: 1;
     }
 
@@ -56,17 +58,39 @@
       left: 0;
       top: 0;
       width: 100%;
-      height: 4px;
-      background: #3498db;
+      height: 2px;
+      background: #666;
+      z-index: 1;
+    }
+
+    &.up-clue::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 2px;
+      background: #666;
+      z-index: 1;
+    }
+
+    &.left-clue::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 2px;
+      height: 100%;
+      background: #666;
       z-index: 1;
     }
   }
 
   &.split-cell {
-    background: #f0f8ff;
+    background: white;
 
     &:hover {
-      background: #e6f3ff;
+      background: #f8f9fa;
     }
 
     &.active-triangle {
@@ -80,25 +104,32 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 2px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 4px;
   position: relative;
+  box-sizing: border-box;
 
   .clue-text {
-    font-size: 8px;
+    font-size: 9px;
     line-height: 1.1;
-    text-align: center;
-    color: #2c3e50;
-    font-weight: 500;
+    text-align: left;
+    color: #000;
+    font-weight: normal;
+    font-family: inherit;
     word-wrap: break-word;
     overflow: hidden;
-    max-height: 45px;
+    height: 100%;
+    width: 100%;
     cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
 
     &:hover {
-      background: rgba(52, 152, 219, 0.1);
-      border-radius: 2px;
+      background: rgba(0, 0, 0, 0.05);
+      border-radius: 1px;
     }
   }
 
@@ -108,38 +139,86 @@
     border: none;
     outline: none;
     background: white;
-    font-size: 8px;
-    font-weight: 500;
-    color: #2c3e50;
-    text-align: center;
-    padding: 2px;
+    font-size: 9px;
+    font-weight: normal;
+    color: #000;
+    text-align: left;
+    font-family: inherit;
+    padding: 0;
     box-sizing: border-box;
-    border-radius: 2px;
-    box-shadow: inset 0 0 0 2px #3498db;
+    border-radius: 1px;
+    box-shadow: inset 0 0 0 1px #ccc;
     resize: none;
+    line-height: 1.1;
 
     &::placeholder {
-      color: #95a5a6;
+      color: #999;
       font-weight: normal;
     }
   }
 
   .clue-arrow {
     position: absolute;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: bold;
-    pointer-events: none;
+    cursor: pointer;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 2px;
+    padding: 1px 2px;
+    line-height: 1;
+    transition: all 0.2s ease;
 
     &.horizontal {
-      bottom: 2px;
-      right: 2px;
-      color: #e74c3c;
+      top: 50%;
+      right: -12px;
+      transform: translateY(-50%);
+      color: #666;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        color: #333;
+        transform: translateY(-50%) scale(1.1);
+      }
     }
 
     &.vertical {
-      top: 2px;
-      right: 2px;
-      color: #3498db;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #666;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        color: #333;
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+
+    &.up {
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #666;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        color: #333;
+        transform: translateX(-50%) scale(1.1);
+      }
+    }
+
+    &.left {
+      top: 50%;
+      left: -12px;
+      transform: translateY(-50%);
+      color: #666;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+
+      &:hover {
+        color: #333;
+        transform: translateY(-50%) scale(1.1);
+      }
     }
   }
 }
@@ -150,10 +229,11 @@
   border: none;
   outline: none;
   text-align: center;
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
   text-transform: uppercase;
   background: transparent;
+  font-family: inherit;
 
   &:focus {
     background: #e3f2fd;
@@ -325,10 +405,10 @@
       position: absolute;
       top: 8px;
       right: 8px;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #000;
-
+      font-family: inherit;
       line-height: 1;
     }
   }
@@ -338,10 +418,10 @@
       position: absolute;
       bottom: 8px;
       left: 8px;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #000;
-
+      font-family: inherit;
       line-height: 1;
     }
   }
@@ -361,9 +441,10 @@
       position: absolute;
       top: 8px;
       left: 8px;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #000;
+      font-family: inherit;
     }
   }
 
@@ -372,9 +453,10 @@
       position: absolute;
       bottom: 8px;
       right: 8px;
-      font-size: 24px;
+      font-size: 20px;
       font-weight: bold;
       color: #000;
+      font-family: inherit;
     }
   }
 }
@@ -386,10 +468,11 @@
     right: 5px;
     width: 30px;
     height: 30px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     background: rgba(255, 255, 255, 1);
     border: 2px solid #3498db;
+    font-family: inherit;
   }
 
   .bottom-triangle .triangle-input {
@@ -397,10 +480,11 @@
     left: 5px;
     width: 30px;
     height: 30px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     background: rgba(255, 255, 255, 1);
     border: 2px solid #3498db;
+    font-family: inherit;
   }
 }
 
@@ -410,10 +494,11 @@
     left: 5px;
     width: 30px;
     height: 30px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     background: rgba(255, 255, 255, 1);
     border: 2px solid #3498db;
+    font-family: inherit;
   }
 
   .bottom-triangle .triangle-input {
@@ -421,9 +506,10 @@
     right: 5px;
     width: 30px;
     height: 30px;
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     background: rgba(255, 255, 255, 1);
     border: 2px solid #3498db;
+    font-family: inherit;
   }
 }
