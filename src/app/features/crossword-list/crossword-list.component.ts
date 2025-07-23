@@ -24,8 +24,8 @@ export class CrosswordListComponent {
   openNewCrosswordDialog(): void {
     this.showNewCrosswordDialog.set(true);
     this.newCrosswordTitle.set('');
-    this.newCrosswordRows.set(15);
-    this.newCrosswordCols.set(15);
+    this.newCrosswordRows.set(16);
+    this.newCrosswordCols.set(11);
   }
 
   closeNewCrosswordDialog(): void {

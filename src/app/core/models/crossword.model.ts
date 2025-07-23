@@ -4,8 +4,12 @@ export interface CrosswordCell {
   col: number;
   letter: string;
   isClueCell: boolean;
+  isSplitCell: boolean;
   clueText?: string;
   clueDirection?: 'horizontal' | 'vertical';
+  // For split cells - two letters in diagonal triangles
+  topLetter?: string; // Letter in top triangle
+  bottomLetter?: string; // Letter in bottom triangle
   wordId?: string;
 }
 

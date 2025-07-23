@@ -23,12 +23,59 @@
           <div
             class="grid-cell"
             [class.clue-cell]="cell.isClueCell"
+            [class.split-cell]="cell.isSplitCell"
             [class.horizontal-clue]="cell.clueDirection === 'horizontal'"
             [class.vertical-clue]="cell.clueDirection === 'vertical'"
+            [class.active-triangle]="
+              activeTriangle()?.row === rowIndex &&
+              activeTriangle()?.col === colIndex
+            "
+            [attr.data-cell]="rowIndex + '-' + colIndex"
             (click)="onCellClick(rowIndex, colIndex)"
+            (contextmenu)="onCellRightClick($event, rowIndex, colIndex)"
           >
-            @if (cell.isClueCell && cell.clueText) {
-            <!-- Clue cell with text and arrow -->
+            @if (cell.isSplitCell) {
+            <!-- Split cell with two letter triangles -->
+            <div class="split-cell-content">
+              <div class="diagonal-line"></div>
+              <div
+                class="triangle top-triangle"
+                (click)="focusTriangle(rowIndex, colIndex, 'top', $event)"
+              >
+                <span class="triangle-letter">{{ cell.topLetter || "" }}</span>
+              </div>
+              <div
+                class="triangle bottom-triangle"
+                (click)="focusTriangle(rowIndex, colIndex, 'bottom', $event)"
+              >
+                <span class="triangle-letter">{{
+                  cell.bottomLetter || ""
+                }}</span>
+              </div>
+              <!-- Hidden inputs for keyboard handling -->
+              <input
+                #topInput
+                type="text"
+                class="hidden-input"
+                maxlength="1"
+                [(ngModel)]="cell.topLetter"
+                (blur)="onTriangleBlur()"
+                (keydown)="onTriangleKeydown($event, rowIndex, colIndex, 'top')"
+              />
+              <input
+                #bottomInput
+                type="text"
+                class="hidden-input"
+                maxlength="1"
+                [(ngModel)]="cell.bottomLetter"
+                (blur)="onTriangleBlur()"
+                (keydown)="
+                  onTriangleKeydown($event, rowIndex, colIndex, 'bottom')
+                "
+              />
+            </div>
+            } @else if (cell.isClueCell && cell.clueText) {
+            <!-- Regular clue cell with text and arrow -->
             <div class="clue-content">
               <div class="clue-text">{{ cell.clueText }}</div>
               @if (cell.clueDirection === 'horizontal') {
@@ -55,33 +102,6 @@
     </div>
 
     <div class="sidebar">
-      <div class="tools-panel">
-        <h3>Ferramentas</h3>
-        <div class="tool-group">
-          <button
-            class="tool-btn"
-            [class.active]="currentTool() === 'clue-horizontal'"
-            (click)="setTool('clue-horizontal')"
-          >
-            ► Dica Horizontal
-          </button>
-          <button
-            class="tool-btn"
-            [class.active]="currentTool() === 'clue-vertical'"
-            (click)="setTool('clue-vertical')"
-          >
-            ▼ Dica Vertical
-          </button>
-          <button
-            class="tool-btn"
-            [class.active]="currentTool() === 'clear'"
-            (click)="setTool('clear')"
-          >
-            🗑️ Limpar Célula
-          </button>
-        </div>
-      </div>
-
       @if (selectedCell()) {
       <div class="cell-editor-panel">
         <h3>
@@ -89,7 +109,57 @@
           {{ selectedCell()!.col + 1 }})
         </h3>
 
-        @if (selectedCell()!.isClueCell) {
+        @if (selectedCell()!.isSplitCell) {
+        <div class="split-cell-editor">
+          <h4>Célula Dividida - Duas Letras</h4>
+
+          <div class="usage-tip">
+            <p><strong>💡 Como usar:</strong></p>
+            <ul>
+              <li>Clique no triângulo superior ou inferior</li>
+              <li>Digite uma letra diretamente</li>
+              <li>Use setas para navegar entre triângulos</li>
+              <li>Tab para ir ao próximo triângulo</li>
+            </ul>
+          </div>
+
+          <div class="letter-editor">
+            <label for="top-letter">
+              🔺 Letra Superior:
+              <span class="current-letter">{{
+                selectedCell()!.topLetter || "(vazio)"
+              }}</span>
+            </label>
+            <input
+              id="top-letter"
+              type="text"
+              [(ngModel)]="selectedCell()!.topLetter"
+              placeholder="Clique no triângulo superior na grade"
+              maxlength="1"
+              class="letter-input"
+              readonly
+            />
+          </div>
+
+          <div class="letter-editor">
+            <label for="bottom-letter">
+              🔻 Letra Inferior:
+              <span class="current-letter">{{
+                selectedCell()!.bottomLetter || "(vazio)"
+              }}</span>
+            </label>
+            <input
+              id="bottom-letter"
+              type="text"
+              [(ngModel)]="selectedCell()!.bottomLetter"
+              placeholder="Clique no triângulo inferior na grade"
+              maxlength="1"
+              class="letter-input"
+              readonly
+            />
+          </div>
+        </div>
+        } @else if (selectedCell()!.isClueCell) {
         <div class="clue-editor">
           <label for="clue-text">Texto da Dica:</label>
           <textarea
@@ -126,13 +196,19 @@
         <div class="instructions">
           <p><strong>Como usar:</strong></p>
           <ul>
-            <li>Clique em uma célula para selecioná-la</li>
             <li>
-              Use as ferramentas para adicionar dicas horizontais (►) ou
-              verticais (▼)
+              <strong>Clique esquerdo:</strong> Selecionar célula para edição
             </li>
+            <li><strong>Clique direito:</strong> Alternar tipo de célula</li>
+            <li><strong>Tipos de célula:</strong></li>
+            <ul>
+              <li>🔲 Regular - Para respostas</li>
+              <li>► Dica Horizontal</li>
+              <li>▼ Dica Vertical</li>
+              <li>⧄ Célula Dividida - Duas letras</li>
+            </ul>
+            <li>Clique diretamente nos triângulos para inserir letras</li>
             <li>Dicas são colocadas diretamente na grade (estilo Diretas)</li>
-            <li>Células restantes são preenchidas com as respostas</li>
             <li>Não há células bloqueadas - toda a grade é utilizável</li>
           </ul>
         </div>

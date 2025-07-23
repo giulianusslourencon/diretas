@@ -48,8 +48,11 @@ export class CrosswordService {
           col,
           letter: '',
           isClueCell: false,
+          isSplitCell: false,
           clueText: '',
           clueDirection: undefined,
+          topLetter: '',
+          bottomLetter: '',
           wordId: undefined,
         };
       }
