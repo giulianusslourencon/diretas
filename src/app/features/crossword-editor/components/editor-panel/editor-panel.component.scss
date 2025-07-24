@@ -6,6 +6,7 @@
 }
 
 .cell-editor-panel,
+.export-panel,
 .info-panel {
   background: white;
   border-radius: 8px;
@@ -194,6 +195,52 @@
 
     &:hover {
       background-color: #7f8c8d;
+    }
+  }
+
+  &.btn-success {
+    background-color: #27ae60;
+    color: white;
+
+    &:hover {
+      background-color: #229954;
+    }
+  }
+}
+
+.export-panel {
+  .export-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .export-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: #495057;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+      margin: 0;
+      cursor: pointer;
+    }
+
+    &:hover {
+      color: #2c3e50;
     }
   }
 }

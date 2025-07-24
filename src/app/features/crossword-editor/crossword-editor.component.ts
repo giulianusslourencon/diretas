@@ -8,9 +8,11 @@ import {
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CrosswordService } from '../../core/services/crossword.service';
+import { PdfExportService } from '../../core/services/pdf-export.service';
 import {
   CrosswordGrid,
   CrosswordCell,
+  CrosswordExportOptions,
 } from '../../core/models/crossword.model';
 import { CrosswordGridComponent, EditorPanelComponent } from './components';
 import {
@@ -30,6 +32,7 @@ import {
 })
 export class CrosswordEditorComponent implements OnInit {
   private readonly crosswordService = inject(CrosswordService);
+  private readonly pdfExportService = inject(PdfExportService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -325,5 +328,20 @@ export class CrosswordEditorComponent implements OnInit {
         input.select();
       }
     }, 0);
+  }
+
+  async onExportToPdf(options: CrosswordExportOptions): Promise<void> {
+    const crossword = this.crossword();
+    if (!crossword) {
+      console.error('No crossword available for export');
+      return;
+    }
+
+    try {
+      await this.pdfExportService.exportCrosswordToPdf(crossword, options);
+    } catch (error) {
+      console.error('Failed to export crossword to PDF:', error);
+      // You could add a toast notification here to inform the user
+    }
   }
 }

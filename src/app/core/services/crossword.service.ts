@@ -4,6 +4,7 @@ import {
   CrosswordMetadata,
   CrosswordCell,
   CrosswordWord,
+  CrosswordExportOptions,
 } from '../models/crossword.model';
 
 @Injectable({

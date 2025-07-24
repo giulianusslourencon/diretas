@@ -1,7 +1,16 @@
-import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  input,
+  output,
+  ChangeDetectionStrategy,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CrosswordCell } from '../../../../core/models/crossword.model';
+import {
+  CrosswordCell,
+  CrosswordExportOptions,
+} from '../../../../core/models/crossword.model';
 
 @Component({
   selector: 'app-editor-panel',
@@ -15,6 +24,14 @@ export class EditorPanelComponent {
 
   readonly clearCell = output<void>();
   readonly saveChanges = output<void>();
+  readonly exportToPdf = output<CrosswordExportOptions>();
+
+  readonly exportOptions = signal<CrosswordExportOptions>({
+    includeAnswers: false,
+    includeClues: true,
+    paperSize: 'A4',
+    orientation: 'portrait',
+  });
 
   onClearCell(): void {
     this.clearCell.emit();
@@ -22,5 +39,21 @@ export class EditorPanelComponent {
 
   onSaveChanges(): void {
     this.saveChanges.emit();
+  }
+
+  onExportToPdf(): void {
+    this.exportToPdf.emit(this.exportOptions());
+  }
+
+  updateExportOption(option: keyof CrosswordExportOptions, event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const currentOptions = this.exportOptions();
+
+    if (option === 'includeAnswers' || option === 'includeClues') {
+      this.exportOptions.set({
+        ...currentOptions,
+        [option]: target.checked,
+      });
+    }
   }
 }
