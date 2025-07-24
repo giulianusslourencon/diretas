@@ -19,14 +19,17 @@
       <app-crossword-grid
         [crossword]="crossword()!"
         [selectedCell]="selectedCell()"
+        [editingCell]="editingCell()"
         [activeTriangle]="activeTriangle()"
         (cellClick)="onCellClick($event)"
+        (cellDoubleClick)="onCellDoubleClick($event)"
         (cellRightClick)="onCellRightClick($event)"
         (cellFocus)="onCellFocus($event)"
         (triangleClick)="onTriangleClick($event)"
         (triangleKeydown)="onTriangleKeydown($event)"
         (triangleBlur)="onTriangleBlur()"
         (clueInputBlur)="onClueInputBlur()"
+        (clueInputChange)="onCellPropertyChange()"
       />
     </div>
 
@@ -35,6 +38,9 @@
       (clearCell)="clearSelectedCell()"
       (saveChanges)="saveChanges()"
       (exportToPdf)="onExportToPdf($event)"
+      (editorMouseDown)="onEditorPanelMouseDown()"
+      (editorMouseUp)="onEditorPanelMouseUp()"
+      (cellPropertyChange)="onCellPropertyChange()"
     />
   </main>
   } @else {

@@ -25,6 +25,9 @@ export class EditorPanelComponent {
   readonly clearCell = output<void>();
   readonly saveChanges = output<void>();
   readonly exportToPdf = output<CrosswordExportOptions>();
+  readonly editorMouseDown = output<void>();
+  readonly editorMouseUp = output<void>();
+  readonly cellPropertyChange = output<void>();
 
   readonly exportOptions = signal<CrosswordExportOptions>({
     includeAnswers: false,
@@ -55,5 +58,17 @@ export class EditorPanelComponent {
         [option]: target.checked,
       });
     }
+  }
+
+  onEditorMouseDown(): void {
+    this.editorMouseDown.emit();
+  }
+
+  onEditorMouseUp(): void {
+    this.editorMouseUp.emit();
+  }
+
+  onCellPropertyChange(): void {
+    this.cellPropertyChange.emit();
   }
 }

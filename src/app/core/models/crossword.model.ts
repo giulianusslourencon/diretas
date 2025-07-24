@@ -7,6 +7,8 @@ export interface CrosswordCell {
   isSplitCell: boolean;
   clueText?: string;
   clueDirection?: 'horizontal' | 'vertical' | 'up' | 'left';
+  boldClueText?: boolean; // Whether clue text should be bold
+  textSize?: 'small' | 'medium' | 'large'; // Text size for clue text
   // For split cells - two letters in diagonal triangles
   topLetter?: string; // Letter in top triangle
   bottomLetter?: string; // Letter in bottom triangle

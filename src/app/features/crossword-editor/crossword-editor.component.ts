@@ -39,7 +39,9 @@ export class CrosswordEditorComponent implements OnInit {
   readonly crossword = signal<CrosswordGrid | null>(null);
   readonly isLoading = signal(true);
   readonly selectedCell = signal<CrosswordCell | null>(null);
+  readonly editingCell = signal<CrosswordCell | null>(null);
   readonly activeTriangle = signal<ActiveTriangle | null>(null);
+  private isInteractingWithEditor = false;
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -70,10 +72,32 @@ export class CrosswordEditorComponent implements OnInit {
     if (!crossword) return;
 
     const cell = crossword.cells[data.row][data.col];
+    const currentSelected = this.selectedCell();
+
+    // Only update selection if it's a different cell
+    if (
+      !currentSelected ||
+      currentSelected.row !== cell.row ||
+      currentSelected.col !== cell.col
+    ) {
+      this.selectedCell.set(cell);
+      // Don't auto-focus on single click for clue cells
+    }
+    // Don't focus input on single click, even if same cell
+  }
+
+  onCellDoubleClick(data: CellClickEvent): void {
+    const crossword = this.crossword();
+    if (!crossword) return;
+
+    const cell = crossword.cells[data.row][data.col];
+
+    // Select the cell first if not already selected
     this.selectedCell.set(cell);
 
-    // Auto-focus clue input if it's a clue cell
+    // Set editing state and focus clue input if it's a clue cell
     if (cell.isClueCell) {
+      this.editingCell.set(cell);
       this.focusClueInput();
     }
   }
@@ -301,21 +325,42 @@ export class CrosswordEditorComponent implements OnInit {
   }
 
   onClueInputBlur(): void {
-    // Simply deselect the cell when input loses focus
-    this.selectedCell.set(null);
+    // Always clear editing state when input loses focus
+    this.editingCell.set(null);
+
+    // Trigger change detection by updating the crossword signal
+    this.onCellPropertyChange();
+
+    // Don't deselect if we're interacting with the editor panel
+    if (this.isInteractingWithEditor) {
+      this.isInteractingWithEditor = false;
+      return;
+    }
+
+    // Use a timeout to check if focus moved to the editor panel
+    setTimeout(() => {
+      if (!this.isInteractingWithEditor) {
+        this.selectedCell.set(null);
+      }
+    }, 50);
   }
 
   // Helper methods
   private focusClueInput(): void {
     setTimeout(() => {
-      const clueInput = document.querySelector(
-        '.clue-input'
-      ) as HTMLInputElement;
-      if (clueInput) {
-        clueInput.focus();
-        clueInput.select();
+      // Find the clue input in the currently selected cell
+      const selectedCell = this.selectedCell();
+      if (selectedCell) {
+        const cellSelector = `[data-cell="${selectedCell.row}-${selectedCell.col}"] .clue-input`;
+        const clueInput = document.querySelector(
+          cellSelector
+        ) as HTMLInputElement;
+        if (clueInput) {
+          clueInput.focus();
+          clueInput.select();
+        }
       }
-    }, 0);
+    }, 10); // Slightly longer delay to ensure DOM updates
   }
 
   private focusTriangleInput(): void {
@@ -342,6 +387,38 @@ export class CrosswordEditorComponent implements OnInit {
     } catch (error) {
       console.error('Failed to export crossword to PDF:', error);
       // You could add a toast notification here to inform the user
+    }
+  }
+
+  onEditorPanelMouseDown(): void {
+    this.isInteractingWithEditor = true;
+  }
+
+  onEditorPanelMouseUp(): void {
+    // Reset the flag after a short delay
+    setTimeout(() => {
+      this.isInteractingWithEditor = false;
+    }, 100);
+  }
+
+  onCellPropertyChange(): void {
+    // Trigger change detection when cell properties are modified
+    const crossword = this.crossword();
+    if (crossword) {
+      // Create a deep copy of the crossword with new cell references
+      const newCrossword = {
+        ...crossword,
+        cells: crossword.cells.map((row) => row.map((cell) => ({ ...cell }))),
+      };
+      this.crossword.set(newCrossword);
+
+      // Also update the selected cell reference
+      const selectedCell = this.selectedCell();
+      if (selectedCell) {
+        const newSelectedCell =
+          newCrossword.cells[selectedCell.row][selectedCell.col];
+        this.selectedCell.set(newSelectedCell);
+      }
     }
   }
 }

@@ -28,18 +28,25 @@ import {
 export class CrosswordGridComponent {
   readonly crossword = input.required<CrosswordGrid>();
   readonly selectedCell = input<CrosswordCell | null>(null);
+  readonly editingCell = input<CrosswordCell | null>(null);
   readonly activeTriangle = input<ActiveTriangle | null>(null);
 
   readonly cellClick = output<CellClickEvent>();
+  readonly cellDoubleClick = output<CellClickEvent>();
   readonly cellRightClick = output<CellRightClickEvent>();
   readonly cellFocus = output<CellClickEvent>();
   readonly triangleClick = output<TriangleClickEvent>();
   readonly triangleKeydown = output<TriangleKeydownEvent>();
   readonly triangleBlur = output<void>();
   readonly clueInputBlur = output<void>();
+  readonly clueInputChange = output<void>();
 
   onCellClick(data: CellClickEvent): void {
     this.cellClick.emit(data);
+  }
+
+  onCellDoubleClick(data: CellClickEvent): void {
+    this.cellDoubleClick.emit(data);
   }
 
   onCellRightClick(data: CellRightClickEvent): void {
@@ -66,8 +73,17 @@ export class CrosswordGridComponent {
     this.clueInputBlur.emit();
   }
 
+  onClueInputChange(): void {
+    this.clueInputChange.emit();
+  }
+
   isCellSelected(cell: CrosswordCell): boolean {
     const selected = this.selectedCell();
     return selected === cell;
+  }
+
+  isCellEditing(cell: CrosswordCell): boolean {
+    const editing = this.editingCell();
+    return editing === cell;
   }
 }

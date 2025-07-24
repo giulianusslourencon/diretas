@@ -1,4 +1,8 @@
-<div class="sidebar">
+<div
+  class="sidebar"
+  (mousedown)="onEditorMouseDown()"
+  (mouseup)="onEditorMouseUp()"
+>
   @if (selectedCell()) {
   <div class="cell-editor-panel">
     <h3>
@@ -62,15 +66,40 @@
       <textarea
         id="clue-text"
         [(ngModel)]="selectedCell()!.clueText"
+        (ngModelChange)="onCellPropertyChange()"
         placeholder="Digite a dica aqui..."
         rows="3"
       ></textarea>
 
       <label for="clue-direction">Direção:</label>
-      <select id="clue-direction" [(ngModel)]="selectedCell()!.clueDirection">
+      <select
+        id="clue-direction"
+        [(ngModel)]="selectedCell()!.clueDirection"
+        (ngModelChange)="onCellPropertyChange()"
+      >
         <option value="horizontal">Horizontal ►</option>
         <option value="vertical">Vertical ▼</option>
       </select>
+
+      <label for="text-size">Tamanho do Texto:</label>
+      <select
+        id="text-size"
+        [(ngModel)]="selectedCell()!.textSize"
+        (ngModelChange)="onCellPropertyChange()"
+      >
+        <option value="small">Pequeno</option>
+        <option value="medium">Médio</option>
+        <option value="large">Grande</option>
+      </select>
+
+      <label class="checkbox-label">
+        <input
+          type="checkbox"
+          [(ngModel)]="selectedCell()!.boldClueText"
+          (ngModelChange)="onCellPropertyChange()"
+        />
+        Texto em negrito
+      </label>
     </div>
     }
 

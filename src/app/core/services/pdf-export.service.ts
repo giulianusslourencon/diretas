@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { CrosswordGrid, CrosswordExportOptions } from '../models/crossword.model';
+import {
+  CrosswordGrid,
+  CrosswordExportOptions,
+} from '../models/crossword.model';
 
 @Injectable({
   providedIn: 'root',
@@ -52,8 +55,11 @@ export class PdfExportService {
       // Calculate image dimensions maintaining aspect ratio
       const imgWidth = canvas.width;
       const imgHeight = canvas.height;
-      const ratio = Math.min(availableWidth / imgWidth, availableHeight / imgHeight);
-      
+      const ratio = Math.min(
+        availableWidth / imgWidth,
+        availableHeight / imgHeight
+      );
+
       const finalWidth = imgWidth * ratio;
       const finalHeight = imgHeight * ratio;
 
@@ -71,7 +77,9 @@ export class PdfExportService {
       pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
 
       // Save the PDF
-      const fileName = `${crossword.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_crossword.pdf`;
+      const fileName = `${crossword.title
+        .replace(/[^a-z0-9]/gi, '_')
+        .toLowerCase()}_crossword.pdf`;
       pdf.save(fileName);
     } catch (error) {
       console.error('Error exporting crossword to PDF:', error);
@@ -79,14 +87,18 @@ export class PdfExportService {
     }
   }
 
-  private createTempContainer(crossword: CrosswordGrid, options: CrosswordExportOptions): HTMLElement {
+  private createTempContainer(
+    crossword: CrosswordGrid,
+    options: CrosswordExportOptions
+  ): HTMLElement {
     const container = document.createElement('div');
     container.style.position = 'absolute';
     container.style.left = '-9999px';
     container.style.top = '-9999px';
     container.style.backgroundColor = '#ffffff';
     container.style.padding = '20px';
-    container.style.fontFamily = '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif';
+    container.style.fontFamily =
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif';
 
     // Create grid container
     const gridContainer = document.createElement('div');
@@ -116,13 +128,17 @@ export class PdfExportService {
     return container;
   }
 
-  private createCellElement(cell: any, options: CrosswordExportOptions): HTMLElement {
+  private createCellElement(
+    cell: any,
+    options: CrosswordExportOptions
+  ): HTMLElement {
     const cellDiv = document.createElement('div');
     cellDiv.style.width = '60px';
     cellDiv.style.height = '60px';
     cellDiv.style.border = '1px solid #333';
     cellDiv.style.position = 'relative';
-    cellDiv.style.backgroundColor = '#ffffff';
+    // Set background color based on cell type
+    cellDiv.style.backgroundColor = cell.isClueCell ? '#d0d0d0' : '#ffffff';
     cellDiv.style.boxSizing = 'border-box';
     cellDiv.style.display = 'flex';
     cellDiv.style.alignItems = 'center';
@@ -147,7 +163,11 @@ export class PdfExportService {
     return cellDiv;
   }
 
-  private createSplitCellContent(cellDiv: HTMLElement, cell: any, options: CrosswordExportOptions): void {
+  private createSplitCellContent(
+    cellDiv: HTMLElement,
+    cell: any,
+    options: CrosswordExportOptions
+  ): void {
     // Create diagonal line
     const diagonalLine = document.createElement('div');
     diagonalLine.style.position = 'absolute';
@@ -223,7 +243,11 @@ export class PdfExportService {
     }
   }
 
-  private createClueCellContent(cellDiv: HTMLElement, cell: any, options: CrosswordExportOptions): void {
+  private createClueCellContent(
+    cellDiv: HTMLElement,
+    cell: any,
+    options: CrosswordExportOptions
+  ): void {
     // Add colored indicator based on clue direction
     const indicator = document.createElement('div');
     indicator.style.position = 'absolute';
@@ -266,20 +290,42 @@ export class PdfExportService {
       clueContent.style.height = '100%';
       clueContent.style.display = 'flex';
       clueContent.style.flexDirection = 'column';
-      clueContent.style.justifyContent = 'flex-start';
-      clueContent.style.alignItems = 'flex-start';
+      clueContent.style.justifyContent = 'center';
+      clueContent.style.alignItems = 'center';
       clueContent.style.padding = '4px';
       clueContent.style.boxSizing = 'border-box';
       clueContent.style.position = 'relative';
 
       const clueText = document.createElement('div');
       clueText.textContent = cell.clueText;
-      clueText.style.fontSize = '9px';
-      clueText.style.lineHeight = '1.1';
-      clueText.style.textAlign = 'left';
+
+      // Set font size based on textSize property
+      let fontSize = '9px';
+      let lineHeight = '1.1';
+      switch (cell.textSize) {
+        case 'small':
+          fontSize = '7px';
+          lineHeight = '1.0';
+          break;
+        case 'medium':
+          fontSize = '9px';
+          lineHeight = '1.1';
+          break;
+        case 'large':
+          fontSize = '11px';
+          lineHeight = '1.2';
+          break;
+        default:
+          fontSize = '9px';
+          lineHeight = '1.1';
+      }
+
+      clueText.style.fontSize = fontSize;
+      clueText.style.lineHeight = lineHeight;
+      clueText.style.textAlign = 'center';
       clueText.style.color = '#000';
-      clueText.style.fontWeight = 'normal';
-      clueText.style.wordWrap = 'break-word';
+      clueText.style.fontWeight = cell.boldClueText ? 'bold' : '500';
+      clueText.style.overflowWrap = 'break-word';
       clueText.style.overflow = 'hidden';
       clueText.style.height = '100%';
       clueText.style.width = '100%';

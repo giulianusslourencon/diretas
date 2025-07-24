@@ -1,22 +1,25 @@
 <div class="crossword-grid">
   @for (row of crossword().cells; track $index; let rowIndex = $index) {
-    <div class="grid-row">
-      @for (cell of row; track cell.id; let colIndex = $index) {
-        <app-crossword-cell
-          [cell]="cell"
-          [rowIndex]="rowIndex"
-          [colIndex]="colIndex"
-          [isSelected]="isCellSelected(cell)"
-          [activeTriangle]="activeTriangle()"
-          (cellClick)="onCellClick($event)"
-          (cellRightClick)="onCellRightClick($event)"
-          (cellFocus)="onCellFocus($event)"
-          (triangleClick)="onTriangleClick($event)"
-          (triangleKeydown)="onTriangleKeydown($event)"
-          (triangleBlur)="onTriangleBlur()"
-          (clueInputBlur)="onClueInputBlur()"
-        />
-      }
-    </div>
+  <div class="grid-row">
+    @for (cell of row; track cell.id; let colIndex = $index) {
+    <app-crossword-cell
+      [cell]="cell"
+      [rowIndex]="rowIndex"
+      [colIndex]="colIndex"
+      [isSelected]="isCellSelected(cell)"
+      [isEditing]="isCellEditing(cell)"
+      [activeTriangle]="activeTriangle()"
+      (cellClick)="onCellClick($event)"
+      (cellDoubleClick)="onCellDoubleClick($event)"
+      (cellRightClick)="onCellRightClick($event)"
+      (cellFocus)="onCellFocus($event)"
+      (triangleClick)="onTriangleClick($event)"
+      (triangleKeydown)="onTriangleKeydown($event)"
+      (triangleBlur)="onTriangleBlur()"
+      (clueInputBlur)="onClueInputBlur()"
+      (clueInputChange)="onClueInputChange()"
+    />
+    }
+  </div>
   }
 </div>

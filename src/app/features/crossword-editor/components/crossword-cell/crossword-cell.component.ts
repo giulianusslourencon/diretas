@@ -7,13 +7,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrosswordCell } from '../../../../core/models/crossword.model';
-import {
-  ActiveTriangle,
-  CellClickEvent,
-  CellRightClickEvent,
-  TriangleClickEvent,
-  TriangleKeydownEvent,
-} from '../../types/editor.types';
+import { ActiveTriangle } from '../../types/editor.types';
 
 @Component({
   selector: 'app-crossword-cell',
@@ -27,9 +21,11 @@ export class CrosswordCellComponent {
   readonly rowIndex = input.required<number>();
   readonly colIndex = input.required<number>();
   readonly isSelected = input<boolean>(false);
+  readonly isEditing = input<boolean>(false);
   readonly activeTriangle = input<ActiveTriangle | null>(null);
 
   readonly cellClick = output<{ row: number; col: number }>();
+  readonly cellDoubleClick = output<{ row: number; col: number }>();
   readonly cellRightClick = output<{
     event: MouseEvent;
     row: number;
@@ -50,9 +46,14 @@ export class CrosswordCellComponent {
   }>();
   readonly triangleBlur = output<void>();
   readonly clueInputBlur = output<void>();
+  readonly clueInputChange = output<void>();
 
   onCellClick(): void {
     this.cellClick.emit({ row: this.rowIndex(), col: this.colIndex() });
+  }
+
+  onCellDoubleClick(): void {
+    this.cellDoubleClick.emit({ row: this.rowIndex(), col: this.colIndex() });
   }
 
   onCellRightClick(event: MouseEvent): void {
@@ -91,6 +92,10 @@ export class CrosswordCellComponent {
 
   onClueInputBlur(): void {
     this.clueInputBlur.emit();
+  }
+
+  onClueInputChange(): void {
+    this.clueInputChange.emit();
   }
 
   isTriangleActive(triangle: 'top' | 'bottom'): boolean {

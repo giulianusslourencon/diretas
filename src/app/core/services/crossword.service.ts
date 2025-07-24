@@ -52,6 +52,8 @@ export class CrosswordService {
           isSplitCell: false,
           clueText: '',
           clueDirection: undefined,
+          boldClueText: false,
+          textSize: 'medium',
           topLetter: '',
           bottomLetter: '',
           wordId: undefined,

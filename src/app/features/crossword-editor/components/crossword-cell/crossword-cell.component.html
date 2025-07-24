@@ -9,6 +9,7 @@
   [class.active-triangle]="isActiveTriangleCell()"
   [attr.data-cell]="rowIndex() + '-' + colIndex()"
   (click)="onCellClick()"
+  (dblclick)="onCellDoubleClick()"
   (contextmenu)="onCellRightClick($event)"
 >
   @if (cell().isSplitCell) {
@@ -63,13 +64,18 @@
   } @else if (cell().isClueCell) {
   <!-- Clue cell with editable text -->
   <div class="clue-content">
-    @if (isSelected()) {
+    @if (isEditing()) {
     <!-- Editing mode -->
     <input
       type="text"
       class="clue-input"
+      [class.bold]="cell().boldClueText"
+      [class.text-small]="cell().textSize === 'small'"
+      [class.text-medium]="cell().textSize === 'medium'"
+      [class.text-large]="cell().textSize === 'large'"
       [(ngModel)]="cell().clueText"
       placeholder="Digite a dica..."
+      (input)="onClueInputChange()"
       (blur)="onClueInputBlur()"
       (keydown.enter)="onClueInputBlur()"
       (keydown.escape)="onClueInputBlur()"
@@ -77,7 +83,13 @@
     />
     } @else {
     <!-- Display mode -->
-    <div class="clue-text">
+    <div
+      class="clue-text"
+      [class.bold]="cell().boldClueText"
+      [class.text-small]="cell().textSize === 'small'"
+      [class.text-medium]="cell().textSize === 'medium'"
+      [class.text-large]="cell().textSize === 'large'"
+    >
       {{ cell().clueText || "Clique para editar" }}
     </div>
     } @if (cell().clueDirection === 'horizontal') {
