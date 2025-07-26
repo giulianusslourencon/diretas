@@ -6,7 +6,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CrosswordCell } from '../../../../core/models/crossword.model';
+import {
+  CrosswordCell,
+  ClueDirection,
+  ClueCell,
+  SplitCell,
+  AnswerCell,
+} from '../../../../core/models/crossword.model';
 import { ActiveTriangle } from '../../types/editor.types';
 import { ClueArrowComponent } from '../clue-arrow/clue-arrow.component';
 
@@ -111,5 +117,30 @@ export class CrosswordCellComponent {
   isActiveTriangleCell(): boolean {
     const active = this.activeTriangle();
     return active?.row === this.rowIndex() && active?.col === this.colIndex();
+  }
+
+  // Helper methods for type checking
+  isAnswerCell(): boolean {
+    return this.cell().type === 'answer';
+  }
+
+  isClueCell(): boolean {
+    return this.cell().type === 'clue';
+  }
+
+  isSplitCell(): boolean {
+    return this.cell().type === 'split';
+  }
+
+  getClueCell(): ClueCell | null {
+    return this.isClueCell() ? (this.cell() as ClueCell) : null;
+  }
+
+  getSplitCell(): SplitCell | null {
+    return this.isSplitCell() ? (this.cell() as SplitCell) : null;
+  }
+
+  getAnswerLetter(): string {
+    return this.isAnswerCell() ? (this.cell() as AnswerCell).letter : '';
   }
 }

@@ -10,7 +10,7 @@
       {{ selectedCell()!.col + 1 }})
     </h3>
 
-    @if (selectedCell()!.isSplitCell) {
+    @if (isSplitCell(selectedCell()!)) {
     <div class="split-cell-editor">
       <h4>Célula Dividida - Duas Letras</h4>
 
@@ -28,13 +28,13 @@
         <label for="top-letter">
           🔺 Letra Superior:
           <span class="current-letter">{{
-            selectedCell()!.topLetter || "(vazio)"
+            getSplitCell(selectedCell()!)?.topLetter || "(vazio)"
           }}</span>
         </label>
         <input
           id="top-letter"
           type="text"
-          [(ngModel)]="selectedCell()!.topLetter"
+          [value]="getSplitCell(selectedCell()!)?.topLetter || ''"
           placeholder="Clique no triângulo superior na grade"
           maxlength="1"
           class="letter-input"
@@ -46,13 +46,13 @@
         <label for="bottom-letter">
           🔻 Letra Inferior:
           <span class="current-letter">{{
-            selectedCell()!.bottomLetter || "(vazio)"
+            getSplitCell(selectedCell()!)?.bottomLetter || "(vazio)"
           }}</span>
         </label>
         <input
           id="bottom-letter"
           type="text"
-          [(ngModel)]="selectedCell()!.bottomLetter"
+          [value]="getSplitCell(selectedCell()!)?.bottomLetter || ''"
           placeholder="Clique no triângulo inferior na grade"
           maxlength="1"
           class="letter-input"
@@ -60,12 +60,12 @@
         />
       </div>
     </div>
-    } @else if (selectedCell()!.isClueCell) {
+    } @else if (isClueCell(selectedCell()!)) {
     <div class="clue-editor">
       <label for="clue-text">Texto da Dica:</label>
       <textarea
         id="clue-text"
-        [(ngModel)]="selectedCell()!.clueText"
+        [value]="getClueCell(selectedCell()!)?.clueText || ''"
         (ngModelChange)="onCellPropertyChange()"
         placeholder="Digite a dica aqui..."
         rows="3"
@@ -74,7 +74,7 @@
       <label for="clue-direction">Direção:</label>
       <select
         id="clue-direction"
-        [(ngModel)]="selectedCell()!.clueDirection"
+        [value]="getClueCell(selectedCell()!)?.clueDirection || 'right'"
         (ngModelChange)="onCellPropertyChange()"
       >
         <optgroup label="Direções Básicas">
@@ -100,7 +100,7 @@
       <label for="text-size">Tamanho do Texto:</label>
       <select
         id="text-size"
-        [(ngModel)]="selectedCell()!.textSize"
+        [value]="getClueCell(selectedCell()!)?.textSize || 'medium'"
         (ngModelChange)="onCellPropertyChange()"
       >
         <option value="small">Pequeno</option>
@@ -111,7 +111,7 @@
       <label class="checkbox-label">
         <input
           type="checkbox"
-          [(ngModel)]="selectedCell()!.boldClueText"
+          [checked]="getClueCell(selectedCell()!)?.boldClueText || false"
           (ngModelChange)="onCellPropertyChange()"
         />
         Texto em negrito

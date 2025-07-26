@@ -10,6 +10,8 @@ import { FormsModule } from '@angular/forms';
 import {
   CrosswordCell,
   CrosswordExportOptions,
+  ClueCell,
+  SplitCell,
 } from '../../../../core/models/crossword.model';
 
 @Component({
@@ -67,5 +69,22 @@ export class EditorPanelComponent {
 
   onCellPropertyChange(): void {
     this.cellPropertyChange.emit();
+  }
+
+  // Helper methods for type checking
+  isClueCell(cell: CrosswordCell): boolean {
+    return cell.type === 'clue';
+  }
+
+  isSplitCell(cell: CrosswordCell): boolean {
+    return cell.type === 'split';
+  }
+
+  getClueCell(cell: CrosswordCell): ClueCell | null {
+    return this.isClueCell(cell) ? (cell as ClueCell) : null;
+  }
+
+  getSplitCell(cell: CrosswordCell): SplitCell | null {
+    return this.isSplitCell(cell) ? (cell as SplitCell) : null;
   }
 }

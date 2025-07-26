@@ -1,30 +1,30 @@
 <div
   class="grid-cell"
-  [class.clue-cell]="cell().isClueCell"
-  [class.split-cell]="cell().isSplitCell"
-  [class.right-clue]="cell().clueDirection === 'right'"
-  [class.down-clue]="cell().clueDirection === 'down'"
-  [class.up-clue]="cell().clueDirection === 'up'"
-  [class.left-clue]="cell().clueDirection === 'left'"
-  [class.right-down-clue]="cell().clueDirection === 'right-down'"
-  [class.down-right-clue]="cell().clueDirection === 'down-right'"
-  [class.left-down-clue]="cell().clueDirection === 'left-down'"
-  [class.down-left-clue]="cell().clueDirection === 'down-left'"
-  [class.right-up-clue]="cell().clueDirection === 'right-up'"
-  [class.up-right-clue]="cell().clueDirection === 'up-right'"
-  [class.left-up-clue]="cell().clueDirection === 'left-up'"
-  [class.up-left-clue]="cell().clueDirection === 'up-left'"
+  [class.clue-cell]="isClueCell()"
+  [class.split-cell]="isSplitCell()"
+  [class.right-clue]="getClueCell()?.clueDirection === 'right'"
+  [class.down-clue]="getClueCell()?.clueDirection === 'down'"
+  [class.up-clue]="getClueCell()?.clueDirection === 'up'"
+  [class.left-clue]="getClueCell()?.clueDirection === 'left'"
+  [class.right-down-clue]="getClueCell()?.clueDirection === 'right-down'"
+  [class.down-right-clue]="getClueCell()?.clueDirection === 'down-right'"
+  [class.left-down-clue]="getClueCell()?.clueDirection === 'left-down'"
+  [class.down-left-clue]="getClueCell()?.clueDirection === 'down-left'"
+  [class.right-up-clue]="getClueCell()?.clueDirection === 'right-up'"
+  [class.up-right-clue]="getClueCell()?.clueDirection === 'up-right'"
+  [class.left-up-clue]="getClueCell()?.clueDirection === 'left-up'"
+  [class.up-left-clue]="getClueCell()?.clueDirection === 'up-left'"
   [class.active-triangle]="isActiveTriangleCell()"
   [attr.data-cell]="rowIndex() + '-' + colIndex()"
   (click)="onCellClick()"
   (dblclick)="onCellDoubleClick()"
   (contextmenu)="onCellRightClick($event)"
 >
-  @if (cell().isSplitCell) {
+  @if (isSplitCell()) {
   <!-- Split cell with two letter triangles -->
   <div
     class="split-cell-content"
-    [attr.data-diagonal]="cell().diagonalDirection || 'main'"
+    [attr.data-diagonal]="getSplitCell()?.diagonalDirection || 'main'"
   >
     <div class="diagonal-line"></div>
     <div class="triangle top-triangle" (click)="onTriangleClick('top', $event)">
@@ -34,7 +34,7 @@
         type="text"
         class="triangle-input"
         maxlength="1"
-        [(ngModel)]="cell().topLetter"
+        [value]="getSplitCell()?.topLetter || ''"
         (blur)="onTriangleBlur()"
         (keydown)="onTriangleKeydown($event, 'top')"
         #topInput
@@ -42,7 +42,7 @@
       } @else {
       <!-- Display mode for top triangle -->
       <span class="triangle-letter">
-        {{ cell().topLetter || "" }}
+        {{ getSplitCell()?.topLetter || "" }}
       </span>
       }
     </div>
@@ -56,7 +56,7 @@
         type="text"
         class="triangle-input"
         maxlength="1"
-        [(ngModel)]="cell().bottomLetter"
+        [value]="getSplitCell()?.bottomLetter || ''"
         (blur)="onTriangleBlur()"
         (keydown)="onTriangleKeydown($event, 'bottom')"
         #bottomInput
@@ -64,12 +64,12 @@
       } @else {
       <!-- Display mode for bottom triangle -->
       <span class="triangle-letter">
-        {{ cell().bottomLetter || "" }}
+        {{ getSplitCell()?.bottomLetter || "" }}
       </span>
       }
     </div>
   </div>
-  } @else if (cell().isClueCell) {
+  } @else if (isClueCell()) {
   <!-- Clue cell with editable text -->
   <div class="clue-content">
     @if (isEditing()) {
@@ -77,11 +77,11 @@
     <input
       type="text"
       class="clue-input"
-      [class.bold]="cell().boldClueText"
-      [class.text-small]="cell().textSize === 'small'"
-      [class.text-medium]="cell().textSize === 'medium'"
-      [class.text-large]="cell().textSize === 'large'"
-      [(ngModel)]="cell().clueText"
+      [class.bold]="getClueCell()?.boldClueText"
+      [class.text-small]="getClueCell()?.textSize === 'small'"
+      [class.text-medium]="getClueCell()?.textSize === 'medium'"
+      [class.text-large]="getClueCell()?.textSize === 'large'"
+      [value]="getClueCell()?.clueText || ''"
       placeholder="Digite a dica..."
       (input)="onClueInputChange()"
       (blur)="onClueInputBlur()"
@@ -93,15 +93,15 @@
     <!-- Display mode -->
     <div
       class="clue-text"
-      [class.bold]="cell().boldClueText"
-      [class.text-small]="cell().textSize === 'small'"
-      [class.text-medium]="cell().textSize === 'medium'"
-      [class.text-large]="cell().textSize === 'large'"
+      [class.bold]="getClueCell()?.boldClueText"
+      [class.text-small]="getClueCell()?.textSize === 'small'"
+      [class.text-medium]="getClueCell()?.textSize === 'medium'"
+      [class.text-large]="getClueCell()?.textSize === 'large'"
     >
-      {{ cell().clueText || "Clique para editar" }}
+      {{ getClueCell()?.clueText || "Clique para editar" }}
     </div>
-    } @if (cell().clueDirection) {
-    <app-clue-arrow [direction]="cell().clueDirection!" />
+    } @if (getClueCell()?.clueDirection) {
+    <app-clue-arrow [direction]="getClueCell()!.clueDirection" />
     }
   </div>
   } @else {
@@ -110,7 +110,7 @@
     type="text"
     class="cell-input"
     maxlength="1"
-    [(ngModel)]="cell().letter"
+    [value]="getAnswerLetter()"
     (focus)="onCellFocus()"
   />
   }

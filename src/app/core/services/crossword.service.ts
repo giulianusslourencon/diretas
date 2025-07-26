@@ -1,5 +1,12 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { CrosswordGrid, CrosswordCell } from '../models/crossword.model';
+import {
+  CrosswordGrid,
+  CrosswordCell,
+  AnswerCell,
+  ClueCell,
+  SplitCell,
+  ClueDirection,
+} from '../models/crossword.model';
 
 @Injectable({
   providedIn: 'root',
@@ -23,18 +30,11 @@ export class CrosswordService {
       cells[row] = [];
       for (let col = 0; col < cols; col++) {
         cells[row][col] = {
+          type: 'answer',
           id: `${row}-${col}`,
           row,
           col,
           letter: '',
-          isClueCell: false,
-          isSplitCell: false,
-          clueText: '',
-          clueDirection: undefined,
-          boldClueText: false,
-          textSize: 'medium',
-          topLetter: '',
-          bottomLetter: '',
         };
       }
     }
@@ -79,6 +79,67 @@ export class CrosswordService {
 
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+
+  // Helper functions for cell type management
+  createAnswerCell(
+    id: string,
+    row: number,
+    col: number,
+    letter: string = ''
+  ): AnswerCell {
+    return { type: 'answer', id, row, col, letter };
+  }
+
+  createClueCell(
+    id: string,
+    row: number,
+    col: number,
+    clueText: string = '',
+    clueDirection: ClueDirection = 'right'
+  ): ClueCell {
+    return {
+      type: 'clue',
+      id,
+      row,
+      col,
+      clueText,
+      clueDirection,
+      boldClueText: false,
+      textSize: 'medium',
+    };
+  }
+
+  createSplitCell(
+    id: string,
+    row: number,
+    col: number,
+    topLetter: string = '',
+    bottomLetter: string = '',
+    diagonalDirection: 'main' | 'anti' = 'main'
+  ): SplitCell {
+    return {
+      type: 'split',
+      id,
+      row,
+      col,
+      topLetter,
+      bottomLetter,
+      diagonalDirection,
+    };
+  }
+
+  // Type guards
+  isAnswerCell(cell: CrosswordCell): cell is AnswerCell {
+    return cell.type === 'answer';
+  }
+
+  isClueCell(cell: CrosswordCell): cell is ClueCell {
+    return cell.type === 'clue';
+  }
+
+  isSplitCell(cell: CrosswordCell): cell is SplitCell {
+    return cell.type === 'split';
   }
 
   private loadFromStorage(): void {

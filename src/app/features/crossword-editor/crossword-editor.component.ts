@@ -12,6 +12,9 @@ import { PdfExportService } from '../../core/services/pdf-export.service';
 import {
   CrosswordGrid,
   CrosswordCell,
+  AnswerCell,
+  ClueCell,
+  SplitCell,
   CrosswordExportOptions,
   ClueDirection,
 } from '../../core/models/crossword.model';
@@ -98,7 +101,7 @@ export class CrosswordEditorComponent implements OnInit {
     this.selectedCell.set(cell);
 
     // Set editing state and focus clue input if it's a clue cell
-    if (cell.isClueCell) {
+    if (this.crosswordService.isClueCell(cell)) {
       this.editingCell.set(cell);
       this.focusClueInput();
     }
@@ -121,13 +124,13 @@ export class CrosswordEditorComponent implements OnInit {
   private readonly cellCycleStates: CellCycleState[] = [
     // Regular cell -> Clue cell
     {
-      matches: (cell) => !cell.isClueCell && !cell.isSplitCell,
+      matches: (cell) => this.crosswordService.isAnswerCell(cell),
       action: (row, col) => this.setClueCell(row, col, 'right'),
       description: 'Regular cell -> Clue cell',
     },
     // Clue cell -> Split cell (main diagonal)
     {
-      matches: (cell) => cell.isClueCell,
+      matches: (cell) => this.crosswordService.isClueCell(cell),
       action: (row, col) => {
         this.clearCell(row, col);
         this.toggleSplitCell(row, col, 'main');
@@ -136,13 +139,17 @@ export class CrosswordEditorComponent implements OnInit {
     },
     // Split cell (main diagonal) -> Split cell (anti diagonal)
     {
-      matches: (cell) => cell.isSplitCell && cell.diagonalDirection === 'main',
+      matches: (cell) =>
+        this.crosswordService.isSplitCell(cell) &&
+        cell.diagonalDirection === 'main',
       action: (row, col) => this.toggleSplitCell(row, col, 'anti'),
       description: 'Split cell (main diagonal) -> Split cell (anti diagonal)',
     },
     // Split cell (anti diagonal) -> Regular cell
     {
-      matches: (cell) => cell.isSplitCell && cell.diagonalDirection === 'anti',
+      matches: (cell) =>
+        this.crosswordService.isSplitCell(cell) &&
+        cell.diagonalDirection === 'anti',
       action: (row, col) => this.clearCell(row, col),
       description: 'Split cell (anti diagonal) -> Regular cell',
     },
@@ -175,7 +182,8 @@ export class CrosswordEditorComponent implements OnInit {
   ): CellCycleState {
     return {
       matches: (cell) =>
-        cell.isSplitCell && cell.diagonalDirection === fromDirection,
+        this.crosswordService.isSplitCell(cell) &&
+        cell.diagonalDirection === fromDirection,
       action: (row, col) => {
         if (toDirection === null) {
           this.clearCell(row, col);
@@ -203,17 +211,22 @@ export class CrosswordEditorComponent implements OnInit {
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const currentCell = crossword.cells[row][col];
+    const clueText = this.crosswordService.isClueCell(currentCell)
+      ? currentCell.clueText
+      : 'Digite a dica aqui';
 
-    cell.isClueCell = true;
-    cell.clueDirection = direction;
-    cell.letter = '';
+    const newCell = this.crosswordService.createClueCell(
+      currentCell.id,
+      row,
+      col,
+      clueText,
+      direction
+    );
 
-    if (!cell.clueText) {
-      cell.clueText = 'Digite a dica aqui';
-    }
-
+    crossword.cells[row][col] = newCell;
     this.crossword.set({ ...crossword });
+    this.selectedCell.set(newCell);
   }
 
   private toggleSplitCell(
@@ -224,25 +237,26 @@ export class CrosswordEditorComponent implements OnInit {
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
+    const currentCell = crossword.cells[row][col];
+    let topLetter = '';
+    let bottomLetter = '';
 
-    if (!cell.isSplitCell) {
-      // Convert to split cell
-      cell.isSplitCell = true;
-      cell.isClueCell = false;
-      cell.letter = '';
-      cell.clueText = '';
-      cell.clueDirection = undefined;
-
-      // Initialize with empty letters and set diagonal direction
-      cell.topLetter = '';
-      cell.bottomLetter = '';
-      cell.diagonalDirection = direction;
-    } else {
-      // Just change the diagonal direction
-      cell.diagonalDirection = direction;
+    // Preserve letters if already a split cell
+    if (this.crosswordService.isSplitCell(currentCell)) {
+      topLetter = currentCell.topLetter;
+      bottomLetter = currentCell.bottomLetter;
     }
 
+    const newCell = this.crosswordService.createSplitCell(
+      currentCell.id,
+      row,
+      col,
+      topLetter,
+      bottomLetter,
+      direction
+    );
+
+    crossword.cells[row][col] = newCell;
     this.crossword.set({ ...crossword });
   }
 
@@ -250,16 +264,15 @@ export class CrosswordEditorComponent implements OnInit {
     const crossword = this.crossword();
     if (!crossword) return;
 
-    const cell = crossword.cells[row][col];
-    cell.isClueCell = false;
-    cell.isSplitCell = false;
-    cell.letter = '';
-    cell.clueText = '';
-    cell.clueDirection = undefined;
-    cell.topLetter = '';
-    cell.bottomLetter = '';
-    cell.diagonalDirection = undefined;
+    const currentCell = crossword.cells[row][col];
+    const newCell = this.crosswordService.createAnswerCell(
+      currentCell.id,
+      row,
+      col,
+      ''
+    );
 
+    crossword.cells[row][col] = newCell;
     this.crossword.set({ ...crossword });
   }
 
@@ -309,14 +322,23 @@ export class CrosswordEditorComponent implements OnInit {
     if (event.key.length === 1 && event.key.match(/[a-zA-Z]/)) {
       // Letter input
       const cell = crossword.cells[row][col];
+      if (!this.crosswordService.isSplitCell(cell)) return;
+
       const letter = event.key.toUpperCase();
+      const newTopLetter = triangle === 'top' ? letter : cell.topLetter;
+      const newBottomLetter =
+        triangle === 'bottom' ? letter : cell.bottomLetter;
 
-      if (triangle === 'top') {
-        cell.topLetter = letter;
-      } else {
-        cell.bottomLetter = letter;
-      }
+      const newCell = this.crosswordService.createSplitCell(
+        cell.id,
+        row,
+        col,
+        newTopLetter,
+        newBottomLetter,
+        cell.diagonalDirection
+      );
 
+      crossword.cells[row][col] = newCell;
       this.crossword.set({ ...crossword });
       event.preventDefault();
 
@@ -328,13 +350,21 @@ export class CrosswordEditorComponent implements OnInit {
     } else if (event.key === 'Backspace' || event.key === 'Delete') {
       // Clear current triangle
       const cell = crossword.cells[row][col];
+      if (!this.crosswordService.isSplitCell(cell)) return;
 
-      if (triangle === 'top') {
-        cell.topLetter = '';
-      } else {
-        cell.bottomLetter = '';
-      }
+      const newTopLetter = triangle === 'top' ? '' : cell.topLetter;
+      const newBottomLetter = triangle === 'bottom' ? '' : cell.bottomLetter;
 
+      const newCell = this.crosswordService.createSplitCell(
+        cell.id,
+        row,
+        col,
+        newTopLetter,
+        newBottomLetter,
+        cell.diagonalDirection
+      );
+
+      crossword.cells[row][col] = newCell;
       this.crossword.set({ ...crossword });
       event.preventDefault();
     } else if (
