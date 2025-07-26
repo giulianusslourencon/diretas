@@ -41,7 +41,7 @@
     }
 
     // Use pseudo-elements for colored indicators instead of borders
-    &.horizontal-clue::before {
+    &.right-clue::before {
       content: "";
       position: absolute;
       left: 0;
@@ -52,7 +52,7 @@
       z-index: 1;
     }
 
-    &.vertical-clue::before {
+    &.down-clue::before {
       content: "";
       position: absolute;
       left: 0;

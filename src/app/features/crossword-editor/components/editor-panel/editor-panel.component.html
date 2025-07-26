@@ -78,8 +78,8 @@
         (ngModelChange)="onCellPropertyChange()"
       >
         <optgroup label="Direções Básicas">
-          <option value="horizontal">Horizontal (direita)</option>
-          <option value="vertical">Vertical (baixo)</option>
+          <option value="right">Direita</option>
+          <option value="down">Baixo</option>
           <option value="up">Para cima</option>
           <option value="left">Para esquerda</option>
         </optgroup>
@@ -140,14 +140,6 @@
             (change)="updateExportOption('includeAnswers', $event)"
           />
           Incluir respostas
-        </label>
-        <label class="checkbox-label">
-          <input
-            type="checkbox"
-            [checked]="exportOptions().includeClues"
-            (change)="updateExportOption('includeClues', $event)"
-          />
-          Incluir dicas
         </label>
       </div>
     </div>

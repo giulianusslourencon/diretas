@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrosswordService } from '../../core/services/crossword.service';
-import { CrosswordMetadata } from '../../core/models/crossword.model';
+import { CrosswordGrid } from '../../core/models/crossword.model';
 
 @Component({
   selector: 'app-crossword-list',
@@ -48,11 +48,11 @@ export class CrosswordListComponent {
     this.router.navigate(['/crosswords', crossword.id]);
   }
 
-  editCrossword(crossword: CrosswordMetadata): void {
+  editCrossword(crossword: CrosswordGrid): void {
     this.router.navigate(['/crosswords', crossword.id]);
   }
 
-  deleteCrossword(crossword: CrosswordMetadata): void {
+  deleteCrossword(crossword: CrosswordGrid): void {
     if (confirm(`Tem certeza que deseja excluir "${crossword.title}"?`)) {
       this.crosswordService.deleteCrossword(crossword.id);
     }

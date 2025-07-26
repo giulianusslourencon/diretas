@@ -1,11 +1,5 @@
 import { Injectable, signal, computed } from '@angular/core';
-import {
-  CrosswordGrid,
-  CrosswordMetadata,
-  CrosswordCell,
-  CrosswordWord,
-  CrosswordExportOptions,
-} from '../models/crossword.model';
+import { CrosswordGrid, CrosswordCell } from '../models/crossword.model';
 
 @Injectable({
   providedIn: 'root',
@@ -14,22 +8,7 @@ export class CrosswordService {
   private readonly STORAGE_KEY = 'diretas-crosswords';
 
   private crosswords = signal<CrosswordGrid[]>([]);
-
-  readonly crosswordList = computed(() =>
-    this.crosswords().map(
-      (cw) =>
-        ({
-          id: cw.id,
-          title: cw.title,
-          description: cw.description,
-          rows: cw.rows,
-          cols: cw.cols,
-          wordCount: cw.words.length,
-          createdAt: cw.createdAt,
-          updatedAt: cw.updatedAt,
-        } as CrosswordMetadata)
-    )
-  );
+  readonly crosswordList = computed(() => this.crosswords());
 
   constructor() {
     this.loadFromStorage();
@@ -56,7 +35,6 @@ export class CrosswordService {
           textSize: 'medium',
           topLetter: '',
           bottomLetter: '',
-          wordId: undefined,
         };
       }
     }
@@ -67,7 +45,6 @@ export class CrosswordService {
       rows,
       cols,
       cells,
-      words: [],
       createdAt: now,
       updatedAt: now,
     };

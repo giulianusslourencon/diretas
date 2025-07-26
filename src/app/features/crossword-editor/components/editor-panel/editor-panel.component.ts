@@ -31,9 +31,6 @@ export class EditorPanelComponent {
 
   readonly exportOptions = signal<CrosswordExportOptions>({
     includeAnswers: false,
-    includeClues: true,
-    paperSize: 'A4',
-    orientation: 'portrait',
   });
 
   onClearCell(): void {
@@ -52,7 +49,7 @@ export class EditorPanelComponent {
     const target = event.target as HTMLInputElement;
     const currentOptions = this.exportOptions();
 
-    if (option === 'includeAnswers' || option === 'includeClues') {
+    if (option === 'includeAnswers') {
       this.exportOptions.set({
         ...currentOptions,
         [option]: target.checked,

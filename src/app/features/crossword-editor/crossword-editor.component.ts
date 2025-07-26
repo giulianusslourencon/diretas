@@ -122,7 +122,7 @@ export class CrosswordEditorComponent implements OnInit {
     // Regular cell -> Clue cell
     {
       matches: (cell) => !cell.isClueCell && !cell.isSplitCell,
-      action: (row, col) => this.setClueCell(row, col, 'horizontal'),
+      action: (row, col) => this.setClueCell(row, col, 'right'),
       description: 'Regular cell -> Clue cell',
     },
     // Clue cell -> Split cell (main diagonal)

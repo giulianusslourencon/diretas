@@ -1,6 +1,6 @@
 <div class="clue-arrow" [class]="direction()">
   <svg width="12" height="12" viewBox="0 0 16 16" class="arrow-icon">
-    @switch (direction()) { @case ('horizontal') {
+    @switch (direction()) { @case ('right') {
     <path
       d="M2 8 L12 8 M9 5 L12 8 L9 11"
       stroke="currentColor"
@@ -9,7 +9,7 @@
       stroke-linecap="round"
       stroke-linejoin="round"
     />
-    } @case ('vertical') {
+    } @case ('down') {
     <path
       d="M8 2 L8 12 M5 9 L8 12 L11 9"
       stroke="currentColor"

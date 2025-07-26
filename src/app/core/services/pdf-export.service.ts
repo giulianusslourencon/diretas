@@ -15,9 +15,6 @@ export class PdfExportService {
     crossword: CrosswordGrid,
     options: CrosswordExportOptions = {
       includeAnswers: false,
-      includeClues: true,
-      paperSize: 'A4',
-      orientation: 'portrait',
     }
   ): Promise<void> {
     try {
@@ -41,9 +38,9 @@ export class PdfExportService {
 
       // Create PDF
       const pdf = new jsPDF({
-        orientation: options.orientation,
+        orientation: 'portrait',
         unit: 'mm',
-        format: options.paperSize.toLowerCase() as 'a4' | 'letter',
+        format: 'a4',
       });
 
       // Calculate dimensions
@@ -256,13 +253,13 @@ export class PdfExportService {
     indicator.style.zIndex = '1';
 
     switch (cell.clueDirection) {
-      case 'horizontal':
+      case 'right':
         indicator.style.left = '0';
         indicator.style.top = '0';
         indicator.style.width = '2px';
         indicator.style.height = '100%';
         break;
-      case 'vertical':
+      case 'down':
         indicator.style.left = '0';
         indicator.style.top = '0';
         indicator.style.width = '100%';
@@ -299,8 +296,8 @@ export class PdfExportService {
 
     cellDiv.appendChild(indicator);
 
-    // Add clue text if includeClues is true
-    if (options.includeClues && cell.clueText) {
+    // Add clue text if it exists
+    if (cell.clueText) {
       const clueContent = document.createElement('div');
       clueContent.style.width = '100%';
       clueContent.style.height = '100%';
@@ -373,13 +370,13 @@ export class PdfExportService {
 
       // Set path data and positioning based on direction
       switch (cell.clueDirection) {
-        case 'horizontal':
+        case 'right':
           path.setAttribute('d', 'M2 8 L12 8 M9 5 L12 8 L9 11');
           arrowContainer.style.top = '50%';
           arrowContainer.style.right = '-16px';
           arrowContainer.style.transform = 'translateY(-50%)';
           break;
-        case 'vertical':
+        case 'down':
           path.setAttribute('d', 'M8 2 L8 12 M5 9 L8 12 L11 9');
           arrowContainer.style.bottom = '-16px';
           arrowContainer.style.left = '50%';
