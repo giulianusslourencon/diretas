@@ -1,0 +1,140 @@
+.clue-arrow {
+  position: absolute;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .arrow-icon {
+    color: #666;
+    transition: color 0.2s ease;
+    width: 12px;
+    height: 12px;
+  }
+
+  &:hover {
+    transform: scale(1.2);
+
+    .arrow-icon {
+      color: #333;
+    }
+  }
+
+  // Positioning for each direction
+  &.horizontal {
+    top: 50%;
+    right: -16px;
+    transform: translateY(-50%);
+
+    &:hover {
+      transform: translateY(-50%) scale(1.2);
+    }
+  }
+
+  &.vertical {
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &:hover {
+      transform: translateX(-50%) scale(1.2);
+    }
+  }
+
+  &.up {
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    &:hover {
+      transform: translateX(-50%) scale(1.2);
+    }
+  }
+
+  &.left {
+    top: 50%;
+    left: -16px;
+    transform: translateY(-50%);
+
+    &:hover {
+      transform: translateY(-50%) scale(1.2);
+    }
+  }
+
+  // 90° Turn arrows positioning
+  &.right-down {
+    top: 25%;
+    right: -16px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.down-right {
+    bottom: -16px;
+    left: 25%;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.left-down {
+    top: 25%;
+    left: -16px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.down-left {
+    bottom: -16px;
+    right: 25%;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.right-up {
+    bottom: 25%;
+    right: -16px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.up-right {
+    top: -16px;
+    left: 25%;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.left-up {
+    bottom: 25%;
+    left: -16px;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+
+  &.up-left {
+    top: -16px;
+    right: 25%;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
+}

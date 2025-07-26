@@ -77,8 +77,24 @@
         [(ngModel)]="selectedCell()!.clueDirection"
         (ngModelChange)="onCellPropertyChange()"
       >
-        <option value="horizontal">Horizontal ►</option>
-        <option value="vertical">Vertical ▼</option>
+        <optgroup label="Direções Básicas">
+          <option value="horizontal">Horizontal (direita)</option>
+          <option value="vertical">Vertical (baixo)</option>
+          <option value="up">Para cima</option>
+          <option value="left">Para esquerda</option>
+        </optgroup>
+        <optgroup label="Curvas 90° - Direita/Esquerda">
+          <option value="right-down">Direita-Baixo (→ depois ↓)</option>
+          <option value="right-up">Direita-Cima (→ depois ↑)</option>
+          <option value="left-down">Esquerda-Baixo (← depois ↓)</option>
+          <option value="left-up">Esquerda-Cima (← depois ↑)</option>
+        </optgroup>
+        <optgroup label="Curvas 90° - Cima/Baixo">
+          <option value="down-right">Baixo-Direita (↓ depois →)</option>
+          <option value="down-left">Baixo-Esquerda (↓ depois ←)</option>
+          <option value="up-right">Cima-Direita (↑ depois →)</option>
+          <option value="up-left">Cima-Esquerda (↑ depois ←)</option>
+        </optgroup>
       </select>
 
       <label for="text-size">Tamanho do Texto:</label>
@@ -146,10 +162,29 @@
         <li><strong>Clique direito:</strong> Alternar tipo de célula</li>
         <li><strong>Tipos de célula:</strong></li>
         <ul>
-          <li>🔲 Regular - Para respostas</li>
-          <li>► Dica Horizontal - Clique para editar texto</li>
-          <li>▼ Dica Vertical - Clique para editar texto</li>
-          <li>⧄ Célula Dividida - Duas letras</li>
+          <li>🔲 <strong>Regular</strong> - Para respostas</li>
+          <li><strong>Direções básicas:</strong></li>
+          <ul>
+            <li>Horizontal (direita)</li>
+            <li>Vertical (baixo)</li>
+            <li>Para cima</li>
+            <li>Para esquerda</li>
+          </ul>
+          <li><strong>Curvas 90° (direita/esquerda):</strong></li>
+          <ul>
+            <li>Direita-Baixo (→ depois ↓)</li>
+            <li>Direita-Cima (→ depois ↑)</li>
+            <li>Esquerda-Baixo (← depois ↓)</li>
+            <li>Esquerda-Cima (← depois ↑)</li>
+          </ul>
+          <li><strong>Curvas 90° (cima/baixo):</strong></li>
+          <ul>
+            <li>Baixo-Direita (↓ depois →)</li>
+            <li>Baixo-Esquerda (↓ depois ←)</li>
+            <li>Cima-Direita (↑ depois →)</li>
+            <li>Cima-Esquerda (↑ depois ←)</li>
+          </ul>
+          <li>⧄ <strong>Célula Dividida</strong> - Duas letras diagonais</li>
         </ul>
         <li>
           <strong>Edição de dicas:</strong> Clique na célula de dica para

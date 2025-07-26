@@ -1,3 +1,5 @@
+import { CrosswordCell } from '../../../core/models/crossword.model';
+
 export interface ActiveTriangle {
   row: number;
   col: number;
@@ -23,4 +25,10 @@ export interface TriangleClickEvent extends CellPosition {
 export interface TriangleKeydownEvent extends CellPosition {
   event: KeyboardEvent;
   triangle: 'top' | 'bottom';
+}
+
+export interface CellCycleState {
+  matches: (cell: CrosswordCell) => boolean;
+  action: (row: number, col: number) => void;
+  description: string;
 }

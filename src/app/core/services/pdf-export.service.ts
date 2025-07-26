@@ -4,6 +4,7 @@ import html2canvas from 'html2canvas';
 import {
   CrosswordGrid,
   CrosswordExportOptions,
+  ClueDirection,
 } from '../models/crossword.model';
 
 @Injectable({
@@ -279,6 +280,21 @@ export class PdfExportService {
         indicator.style.width = '2px';
         indicator.style.height = '100%';
         break;
+      case 'right-down':
+      case 'down-right':
+      case 'left-down':
+      case 'down-left':
+      case 'right-up':
+      case 'up-right':
+      case 'left-up':
+      case 'up-left':
+        // For 90° turns, use a corner indicator
+        indicator.style.left = '0';
+        indicator.style.top = '0';
+        indicator.style.width = '4px';
+        indicator.style.height = '4px';
+        indicator.style.borderRadius = '50%';
+        break;
     }
 
     cellDiv.appendChild(indicator);
@@ -332,46 +348,100 @@ export class PdfExportService {
 
       clueContent.appendChild(clueText);
 
-      // Add arrow
-      const arrow = document.createElement('div');
-      arrow.style.position = 'absolute';
-      arrow.style.fontSize = '12px';
-      arrow.style.fontWeight = 'bold';
-      arrow.style.zIndex = '10';
-      arrow.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
-      arrow.style.borderRadius = '2px';
-      arrow.style.padding = '1px 2px';
-      arrow.style.lineHeight = '1';
-      arrow.style.color = '#666';
+      // Add SVG arrow indicator
+      const arrowContainer = document.createElement('div');
+      arrowContainer.style.position = 'absolute';
+      arrowContainer.style.width = '12px';
+      arrowContainer.style.height = '12px';
+      arrowContainer.style.zIndex = '10';
 
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('width', '12');
+      svg.setAttribute('height', '12');
+      svg.setAttribute('viewBox', '0 0 16 16');
+      svg.style.color = '#666';
+
+      const path = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'path'
+      );
+      path.setAttribute('stroke', 'currentColor');
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+
+      // Set path data and positioning based on direction
       switch (cell.clueDirection) {
         case 'horizontal':
-          arrow.textContent = '→';
-          arrow.style.top = '50%';
-          arrow.style.right = '-12px';
-          arrow.style.transform = 'translateY(-50%)';
+          path.setAttribute('d', 'M2 8 L12 8 M9 5 L12 8 L9 11');
+          arrowContainer.style.top = '50%';
+          arrowContainer.style.right = '-16px';
+          arrowContainer.style.transform = 'translateY(-50%)';
           break;
         case 'vertical':
-          arrow.textContent = '↓';
-          arrow.style.bottom = '-12px';
-          arrow.style.left = '50%';
-          arrow.style.transform = 'translateX(-50%)';
+          path.setAttribute('d', 'M8 2 L8 12 M5 9 L8 12 L11 9');
+          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.left = '50%';
+          arrowContainer.style.transform = 'translateX(-50%)';
           break;
         case 'up':
-          arrow.textContent = '↑';
-          arrow.style.top = '-12px';
-          arrow.style.left = '50%';
-          arrow.style.transform = 'translateX(-50%)';
+          path.setAttribute('d', 'M8 14 L8 4 M5 7 L8 4 L11 7');
+          arrowContainer.style.top = '-16px';
+          arrowContainer.style.left = '50%';
+          arrowContainer.style.transform = 'translateX(-50%)';
           break;
         case 'left':
-          arrow.textContent = '←';
-          arrow.style.top = '50%';
-          arrow.style.left = '-12px';
-          arrow.style.transform = 'translateY(-50%)';
+          path.setAttribute('d', 'M14 8 L4 8 M7 5 L4 8 L7 11');
+          arrowContainer.style.top = '50%';
+          arrowContainer.style.left = '-16px';
+          arrowContainer.style.transform = 'translateY(-50%)';
+          break;
+        case 'right-down':
+          path.setAttribute('d', 'M2 8 L8 8 L8 14 M5 11 L8 14 L11 11');
+          arrowContainer.style.top = '25%';
+          arrowContainer.style.right = '-16px';
+          break;
+        case 'down-right':
+          path.setAttribute('d', 'M8 2 L8 8 L14 8 M11 5 L14 8 L11 11');
+          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.left = '25%';
+          break;
+        case 'left-down':
+          path.setAttribute('d', 'M14 8 L8 8 L8 14 M11 11 L8 14 L5 11');
+          arrowContainer.style.top = '25%';
+          arrowContainer.style.left = '-16px';
+          break;
+        case 'down-left':
+          path.setAttribute('d', 'M8 2 L8 8 L2 8 M5 5 L2 8 L5 11');
+          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.right = '25%';
+          break;
+        case 'right-up':
+          path.setAttribute('d', 'M2 8 L8 8 L8 2 M5 5 L8 2 L11 5');
+          arrowContainer.style.bottom = '25%';
+          arrowContainer.style.right = '-16px';
+          break;
+        case 'up-right':
+          path.setAttribute('d', 'M8 14 L8 8 L14 8 M11 11 L14 8 L11 5');
+          arrowContainer.style.top = '-16px';
+          arrowContainer.style.left = '25%';
+          break;
+        case 'left-up':
+          path.setAttribute('d', 'M14 8 L8 8 L8 2 M11 5 L8 2 L5 5');
+          arrowContainer.style.bottom = '25%';
+          arrowContainer.style.left = '-16px';
+          break;
+        case 'up-left':
+          path.setAttribute('d', 'M8 14 L8 8 L2 8 M5 11 L2 8 L5 5');
+          arrowContainer.style.top = '-16px';
+          arrowContainer.style.right = '25%';
           break;
       }
 
-      clueContent.appendChild(arrow);
+      svg.appendChild(path);
+      arrowContainer.appendChild(svg);
+      clueContent.appendChild(arrowContainer);
       cellDiv.appendChild(clueContent);
     }
   }

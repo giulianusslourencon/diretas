@@ -8,10 +8,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CrosswordCell } from '../../../../core/models/crossword.model';
 import { ActiveTriangle } from '../../types/editor.types';
+import { ClueArrowComponent } from '../clue-arrow/clue-arrow.component';
 
 @Component({
   selector: 'app-crossword-cell',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ClueArrowComponent],
   templateUrl: './crossword-cell.component.html',
   styleUrl: './crossword-cell.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

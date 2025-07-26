@@ -13,6 +13,7 @@ import {
   CrosswordGrid,
   CrosswordCell,
   CrosswordExportOptions,
+  ClueDirection,
 } from '../../core/models/crossword.model';
 import { CrosswordGridComponent, EditorPanelComponent } from './components';
 import {
@@ -21,6 +22,7 @@ import {
   CellRightClickEvent,
   TriangleClickEvent,
   TriangleKeydownEvent,
+  CellCycleState,
 } from './types/editor.types';
 
 @Component({
@@ -111,9 +113,40 @@ export class CrosswordEditorComponent implements OnInit {
     const cell = crossword.cells[data.row][data.col];
     this.selectedCell.set(cell);
 
-    // Cycle through cell types: regular -> horizontal clue -> vertical clue -> up clue -> left clue -> split cell -> regular
+    // Cycle through cell types: regular -> clue cell -> split cell (main) -> split cell (anti) -> regular
     this.cycleCellType(data.row, data.col);
   }
+
+  // Cell cycle configuration following OCP - extensible without modification
+  private readonly cellCycleStates: CellCycleState[] = [
+    // Regular cell -> Clue cell
+    {
+      matches: (cell) => !cell.isClueCell && !cell.isSplitCell,
+      action: (row, col) => this.setClueCell(row, col, 'horizontal'),
+      description: 'Regular cell -> Clue cell',
+    },
+    // Clue cell -> Split cell (main diagonal)
+    {
+      matches: (cell) => cell.isClueCell,
+      action: (row, col) => {
+        this.clearCell(row, col);
+        this.toggleSplitCell(row, col, 'main');
+      },
+      description: 'Clue cell -> Split cell (main diagonal)',
+    },
+    // Split cell (main diagonal) -> Split cell (anti diagonal)
+    {
+      matches: (cell) => cell.isSplitCell && cell.diagonalDirection === 'main',
+      action: (row, col) => this.toggleSplitCell(row, col, 'anti'),
+      description: 'Split cell (main diagonal) -> Split cell (anti diagonal)',
+    },
+    // Split cell (anti diagonal) -> Regular cell
+    {
+      matches: (cell) => cell.isSplitCell && cell.diagonalDirection === 'anti',
+      action: (row, col) => this.clearCell(row, col),
+      description: 'Split cell (anti diagonal) -> Regular cell',
+    },
+  ];
 
   private cycleCellType(row: number, col: number): void {
     const crossword = this.crossword();
@@ -121,29 +154,37 @@ export class CrosswordEditorComponent implements OnInit {
 
     const cell = crossword.cells[row][col];
 
-    if (!cell.isClueCell && !cell.isSplitCell) {
-      // Regular cell -> Horizontal clue
-      this.setClueCell(row, col, 'horizontal');
-    } else if (cell.isClueCell && cell.clueDirection === 'horizontal') {
-      // Horizontal clue -> Vertical clue
-      this.setClueCell(row, col, 'vertical');
-    } else if (cell.isClueCell && cell.clueDirection === 'vertical') {
-      // Vertical clue -> Up clue
-      this.setClueCell(row, col, 'up');
-    } else if (cell.isClueCell && cell.clueDirection === 'up') {
-      // Up clue -> Left clue
-      this.setClueCell(row, col, 'left');
-    } else if (cell.isClueCell && cell.clueDirection === 'left') {
-      // Left clue -> Split cell (main diagonal)
-      this.clearCell(row, col);
-      this.toggleSplitCell(row, col, 'main');
-    } else if (cell.isSplitCell && cell.diagonalDirection === 'main') {
-      // Split cell (main diagonal) -> Split cell (anti diagonal)
-      this.toggleSplitCell(row, col, 'anti');
-    } else if (cell.isSplitCell && cell.diagonalDirection === 'anti') {
-      // Split cell (anti diagonal) -> Regular cell
+    // Find the matching state and execute its action
+    const currentState = this.cellCycleStates.find((state) =>
+      state.matches(cell)
+    );
+    if (currentState) {
+      currentState.action(row, col);
+    } else {
+      // Fallback: if no state matches, reset to regular cell
       this.clearCell(row, col);
     }
+  }
+
+  // Helper methods for creating common cycle state patterns
+  // These methods provide a foundation for future extensions
+  private createSplitCellState(
+    fromDirection: 'main' | 'anti',
+    toDirection: 'main' | 'anti' | null,
+    description: string
+  ): CellCycleState {
+    return {
+      matches: (cell) =>
+        cell.isSplitCell && cell.diagonalDirection === fromDirection,
+      action: (row, col) => {
+        if (toDirection === null) {
+          this.clearCell(row, col);
+        } else {
+          this.toggleSplitCell(row, col, toDirection);
+        }
+      },
+      description,
+    };
   }
 
   onCellFocus(data: CellClickEvent): void {
@@ -157,7 +198,7 @@ export class CrosswordEditorComponent implements OnInit {
   private setClueCell(
     row: number,
     col: number,
-    direction: 'horizontal' | 'vertical' | 'up' | 'left'
+    direction: ClueDirection
   ): void {
     const crossword = this.crossword();
     if (!crossword) return;

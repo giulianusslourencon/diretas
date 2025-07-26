@@ -6,6 +6,14 @@
   [class.vertical-clue]="cell().clueDirection === 'vertical'"
   [class.up-clue]="cell().clueDirection === 'up'"
   [class.left-clue]="cell().clueDirection === 'left'"
+  [class.right-down-clue]="cell().clueDirection === 'right-down'"
+  [class.down-right-clue]="cell().clueDirection === 'down-right'"
+  [class.left-down-clue]="cell().clueDirection === 'left-down'"
+  [class.down-left-clue]="cell().clueDirection === 'down-left'"
+  [class.right-up-clue]="cell().clueDirection === 'right-up'"
+  [class.up-right-clue]="cell().clueDirection === 'up-right'"
+  [class.left-up-clue]="cell().clueDirection === 'left-up'"
+  [class.up-left-clue]="cell().clueDirection === 'up-left'"
   [class.active-triangle]="isActiveTriangleCell()"
   [attr.data-cell]="rowIndex() + '-' + colIndex()"
   (click)="onCellClick()"
@@ -92,14 +100,8 @@
     >
       {{ cell().clueText || "Clique para editar" }}
     </div>
-    } @if (cell().clueDirection === 'horizontal') {
-    <div class="clue-arrow horizontal">→</div>
-    } @else if (cell().clueDirection === 'vertical') {
-    <div class="clue-arrow vertical">↓</div>
-    } @else if (cell().clueDirection === 'up') {
-    <div class="clue-arrow up">↑</div>
-    } @else if (cell().clueDirection === 'left') {
-    <div class="clue-arrow left">←</div>
+    } @if (cell().clueDirection) {
+    <app-clue-arrow [direction]="cell().clueDirection!" />
     }
   </div>
   } @else {

@@ -1,3 +1,17 @@
+export type ClueDirection =
+  | 'horizontal'
+  | 'vertical'
+  | 'up'
+  | 'left'
+  | 'right-down'
+  | 'down-right'
+  | 'left-down'
+  | 'down-left'
+  | 'right-up'
+  | 'up-right'
+  | 'left-up'
+  | 'up-left';
+
 export interface CrosswordCell {
   id: string;
   row: number;
@@ -6,7 +20,7 @@ export interface CrosswordCell {
   isClueCell: boolean;
   isSplitCell: boolean;
   clueText?: string;
-  clueDirection?: 'horizontal' | 'vertical' | 'up' | 'left';
+  clueDirection?: ClueDirection;
   boldClueText?: boolean; // Whether clue text should be bold
   textSize?: 'small' | 'medium' | 'large'; // Text size for clue text
   // For split cells - two letters in diagonal triangles
