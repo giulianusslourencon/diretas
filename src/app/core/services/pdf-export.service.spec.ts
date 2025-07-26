@@ -27,85 +27,76 @@ describe('PdfExportService', () => {
       cells: [
         [
           {
+            type: 'answer',
             id: '0-0',
             row: 0,
             col: 0,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
           {
+            type: 'clue',
             id: '0-1',
             row: 0,
             col: 1,
-            letter: '',
-            isClueCell: true,
-            isSplitCell: false,
             clueText: 'Test clue',
             clueDirection: 'right',
+            boldClueText: false,
+            textSize: 'medium',
           },
           {
+            type: 'answer',
             id: '0-2',
             row: 0,
             col: 2,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
         ],
         [
           {
+            type: 'answer',
             id: '1-0',
             row: 1,
             col: 0,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
           {
+            type: 'split',
             id: '1-1',
             row: 1,
             col: 1,
-            letter: '',
-            isClueCell: false,
-            isSplitCell: true,
             diagonalDirection: 'main',
             topLetter: 'A',
             bottomLetter: 'B',
           },
           {
+            type: 'answer',
             id: '1-2',
             row: 1,
             col: 2,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
         ],
         [
           {
+            type: 'answer',
             id: '2-0',
             row: 2,
             col: 0,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
           {
+            type: 'answer',
             id: '2-1',
             row: 2,
             col: 1,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
           {
+            type: 'answer',
             id: '2-2',
             row: 2,
             col: 2,
             letter: '',
-            isClueCell: false,
-            isSplitCell: false,
           },
         ],
       ],
@@ -129,12 +120,11 @@ describe('PdfExportService', () => {
 
   it('should create cell elements with correct properties', () => {
     const mockCell = {
+      type: 'answer' as const,
       id: '0-0',
       row: 0,
       col: 0,
       letter: 'A',
-      isClueCell: false,
-      isSplitCell: false,
     };
 
     const options: CrosswordExportOptions = {
@@ -150,14 +140,14 @@ describe('PdfExportService', () => {
 
   it('should handle clue cells correctly', () => {
     const mockClueCell = {
+      type: 'clue' as const,
       id: '0-0',
       row: 0,
       col: 0,
-      letter: '',
-      isClueCell: true,
-      isSplitCell: false,
       clueText: 'Test clue',
-      clueDirection: 'right',
+      clueDirection: 'right' as const,
+      boldClueText: false,
+      textSize: 'medium' as const,
     };
 
     const options: CrosswordExportOptions = {
@@ -177,13 +167,11 @@ describe('PdfExportService', () => {
 
   it('should handle split cells correctly', () => {
     const mockSplitCell = {
+      type: 'split' as const,
       id: '0-0',
       row: 0,
       col: 0,
-      letter: '',
-      isClueCell: false,
-      isSplitCell: true,
-      diagonalDirection: 'main',
+      diagonalDirection: 'main' as const,
       topLetter: 'A',
       bottomLetter: 'B',
     };

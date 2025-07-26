@@ -30,6 +30,7 @@
         (triangleBlur)="onTriangleBlur()"
         (clueInputBlur)="onClueInputBlur()"
         (clueInputChange)="onCellPropertyChange()"
+        (answerLetterChange)="onAnswerLetterChange($event)"
       />
     </div>
 
@@ -41,6 +42,10 @@
       (editorMouseDown)="onEditorPanelMouseDown()"
       (editorMouseUp)="onEditorPanelMouseUp()"
       (cellPropertyChange)="onCellPropertyChange()"
+      (clueTextChange)="updateClueText($event)"
+      (clueDirectionChange)="updateClueDirection($event)"
+      (textSizeChange)="updateTextSize($event)"
+      (boldTextChange)="updateBoldText($event)"
     />
   </main>
   } @else {

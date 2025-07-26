@@ -12,6 +12,7 @@ import {
   CrosswordExportOptions,
   ClueCell,
   SplitCell,
+  ClueDirection,
 } from '../../../../core/models/crossword.model';
 
 @Component({
@@ -30,6 +31,10 @@ export class EditorPanelComponent {
   readonly editorMouseDown = output<void>();
   readonly editorMouseUp = output<void>();
   readonly cellPropertyChange = output<void>();
+  readonly clueTextChange = output<string>();
+  readonly clueDirectionChange = output<ClueDirection>();
+  readonly textSizeChange = output<'small' | 'medium' | 'large'>();
+  readonly boldTextChange = output<boolean>();
 
   readonly exportOptions = signal<CrosswordExportOptions>({
     includeAnswers: false,
@@ -86,5 +91,26 @@ export class EditorPanelComponent {
 
   getSplitCell(cell: CrosswordCell): SplitCell | null {
     return this.isSplitCell(cell) ? (cell as SplitCell) : null;
+  }
+
+  // Methods to handle form changes
+  onClueTextChange(event: Event): void {
+    const target = event.target as HTMLTextAreaElement;
+    this.clueTextChange.emit(target.value);
+  }
+
+  onClueDirectionChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.clueDirectionChange.emit(target.value as ClueDirection);
+  }
+
+  onTextSizeChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.textSizeChange.emit(target.value as 'small' | 'medium' | 'large');
+  }
+
+  onBoldTextChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.boldTextChange.emit(target.checked);
   }
 }

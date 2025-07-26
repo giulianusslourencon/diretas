@@ -4,6 +4,10 @@ import html2canvas from 'html2canvas';
 import {
   CrosswordGrid,
   CrosswordExportOptions,
+  CrosswordCell,
+  ClueCell,
+  SplitCell,
+  AnswerCell,
   ClueDirection,
 } from '../models/crossword.model';
 
@@ -11,6 +15,18 @@ import {
   providedIn: 'root',
 })
 export class PdfExportService {
+  // Type guards for cell types
+  private isAnswerCell(cell: CrosswordCell): cell is AnswerCell {
+    return cell.type === 'answer';
+  }
+
+  private isClueCell(cell: CrosswordCell): cell is ClueCell {
+    return cell.type === 'clue';
+  }
+
+  private isSplitCell(cell: CrosswordCell): cell is SplitCell {
+    return cell.type === 'split';
+  }
   async exportCrosswordToPdf(
     crossword: CrosswordGrid,
     options: CrosswordExportOptions = {
@@ -127,7 +143,7 @@ export class PdfExportService {
   }
 
   private createCellElement(
-    cell: any,
+    cell: CrosswordCell,
     options: CrosswordExportOptions
   ): HTMLElement {
     const cellDiv = document.createElement('div');
@@ -136,17 +152,19 @@ export class PdfExportService {
     cellDiv.style.border = '1px solid #333';
     cellDiv.style.position = 'relative';
     // Set background color based on cell type
-    cellDiv.style.backgroundColor = cell.isClueCell ? '#d0d0d0' : '#ffffff';
+    cellDiv.style.backgroundColor = this.isClueCell(cell)
+      ? '#d0d0d0'
+      : '#ffffff';
     cellDiv.style.boxSizing = 'border-box';
     cellDiv.style.display = 'flex';
     cellDiv.style.alignItems = 'center';
     cellDiv.style.justifyContent = 'center';
 
-    if (cell.isSplitCell) {
+    if (this.isSplitCell(cell)) {
       this.createSplitCellContent(cellDiv, cell, options);
-    } else if (cell.isClueCell) {
+    } else if (this.isClueCell(cell)) {
       this.createClueCellContent(cellDiv, cell, options);
-    } else {
+    } else if (this.isAnswerCell(cell)) {
       // Regular answer cell - don't show letters unless includeAnswers is true
       if (options.includeAnswers && cell.letter) {
         const letterSpan = document.createElement('span');
@@ -163,7 +181,7 @@ export class PdfExportService {
 
   private createSplitCellContent(
     cellDiv: HTMLElement,
-    cell: any,
+    cell: SplitCell,
     options: CrosswordExportOptions
   ): void {
     // Create diagonal line
@@ -243,7 +261,7 @@ export class PdfExportService {
 
   private createClueCellContent(
     cellDiv: HTMLElement,
-    cell: any,
+    cell: ClueCell,
     options: CrosswordExportOptions
   ): void {
     // Add colored indicator based on clue direction

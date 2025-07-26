@@ -492,4 +492,135 @@ export class CrosswordEditorComponent implements OnInit {
       }
     }
   }
+
+  // Methods to update cell properties from editor panel
+  updateClueText(text: string): void {
+    const crossword = this.crossword();
+    const selectedCell = this.selectedCell();
+    if (
+      !crossword ||
+      !selectedCell ||
+      !this.crosswordService.isClueCell(selectedCell)
+    )
+      return;
+
+    const newCell = this.crosswordService.createClueCell(
+      selectedCell.id,
+      selectedCell.row,
+      selectedCell.col,
+      text,
+      selectedCell.clueDirection
+    );
+    newCell.boldClueText = selectedCell.boldClueText;
+    newCell.textSize = selectedCell.textSize;
+
+    crossword.cells[selectedCell.row][selectedCell.col] = newCell;
+    this.crossword.set({ ...crossword });
+    this.selectedCell.set(newCell);
+  }
+
+  updateClueDirection(direction: ClueDirection): void {
+    const crossword = this.crossword();
+    const selectedCell = this.selectedCell();
+    if (
+      !crossword ||
+      !selectedCell ||
+      !this.crosswordService.isClueCell(selectedCell)
+    )
+      return;
+
+    const newCell = this.crosswordService.createClueCell(
+      selectedCell.id,
+      selectedCell.row,
+      selectedCell.col,
+      selectedCell.clueText,
+      direction
+    );
+    newCell.boldClueText = selectedCell.boldClueText;
+    newCell.textSize = selectedCell.textSize;
+
+    crossword.cells[selectedCell.row][selectedCell.col] = newCell;
+    this.crossword.set({ ...crossword });
+    this.selectedCell.set(newCell);
+  }
+
+  updateTextSize(size: 'small' | 'medium' | 'large'): void {
+    const crossword = this.crossword();
+    const selectedCell = this.selectedCell();
+    if (
+      !crossword ||
+      !selectedCell ||
+      !this.crosswordService.isClueCell(selectedCell)
+    )
+      return;
+
+    const newCell = this.crosswordService.createClueCell(
+      selectedCell.id,
+      selectedCell.row,
+      selectedCell.col,
+      selectedCell.clueText,
+      selectedCell.clueDirection
+    );
+    newCell.boldClueText = selectedCell.boldClueText;
+    newCell.textSize = size;
+
+    crossword.cells[selectedCell.row][selectedCell.col] = newCell;
+    this.crossword.set({ ...crossword });
+    this.selectedCell.set(newCell);
+  }
+
+  updateBoldText(bold: boolean): void {
+    const crossword = this.crossword();
+    const selectedCell = this.selectedCell();
+    if (
+      !crossword ||
+      !selectedCell ||
+      !this.crosswordService.isClueCell(selectedCell)
+    )
+      return;
+
+    const newCell = this.crosswordService.createClueCell(
+      selectedCell.id,
+      selectedCell.row,
+      selectedCell.col,
+      selectedCell.clueText,
+      selectedCell.clueDirection
+    );
+    newCell.boldClueText = bold;
+    newCell.textSize = selectedCell.textSize;
+
+    crossword.cells[selectedCell.row][selectedCell.col] = newCell;
+    this.crossword.set({ ...crossword });
+    this.selectedCell.set(newCell);
+  }
+
+  onAnswerLetterChange(data: {
+    row: number;
+    col: number;
+    letter: string;
+  }): void {
+    const crossword = this.crossword();
+    if (!crossword) return;
+
+    const { row, col, letter } = data;
+    const cell = crossword.cells[row][col];
+
+    if (!this.crosswordService.isAnswerCell(cell)) return;
+
+    const newCell = this.crosswordService.createAnswerCell(
+      cell.id,
+      row,
+      col,
+      letter
+    );
+
+    crossword.cells[row][col] = newCell;
+    this.crossword.set({ ...crossword });
+
+    // Update selected cell if it's the same cell
+    const selectedCell = this.selectedCell();
+    if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
+      this.selectedCell.set(newCell);
+    }
+  }
 }

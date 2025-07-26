@@ -111,6 +111,7 @@
     class="cell-input"
     maxlength="1"
     [value]="getAnswerLetter()"
+    (input)="onAnswerInput($event)"
     (focus)="onCellFocus()"
   />
   }

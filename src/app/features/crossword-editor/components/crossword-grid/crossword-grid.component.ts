@@ -40,6 +40,11 @@ export class CrosswordGridComponent {
   readonly triangleBlur = output<void>();
   readonly clueInputBlur = output<void>();
   readonly clueInputChange = output<void>();
+  readonly answerLetterChange = output<{
+    row: number;
+    col: number;
+    letter: string;
+  }>();
 
   onCellClick(data: CellClickEvent): void {
     this.cellClick.emit(data);
@@ -85,5 +90,13 @@ export class CrosswordGridComponent {
   isCellEditing(cell: CrosswordCell): boolean {
     const editing = this.editingCell();
     return editing === cell;
+  }
+
+  onAnswerLetterChange(data: {
+    row: number;
+    col: number;
+    letter: string;
+  }): void {
+    this.answerLetterChange.emit(data);
   }
 }

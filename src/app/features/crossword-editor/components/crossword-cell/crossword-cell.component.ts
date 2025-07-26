@@ -54,6 +54,11 @@ export class CrosswordCellComponent {
   readonly triangleBlur = output<void>();
   readonly clueInputBlur = output<void>();
   readonly clueInputChange = output<void>();
+  readonly answerLetterChange = output<{
+    row: number;
+    col: number;
+    letter: string;
+  }>();
 
   onCellClick(): void {
     this.cellClick.emit({ row: this.rowIndex(), col: this.colIndex() });
@@ -103,6 +108,16 @@ export class CrosswordCellComponent {
 
   onClueInputChange(): void {
     this.clueInputChange.emit();
+  }
+
+  onAnswerInput(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    const letter = target.value.toUpperCase();
+    this.answerLetterChange.emit({
+      row: this.rowIndex(),
+      col: this.colIndex(),
+      letter: letter,
+    });
   }
 
   isTriangleActive(triangle: 'top' | 'bottom'): boolean {
