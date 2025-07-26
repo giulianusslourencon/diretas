@@ -264,56 +264,6 @@ export class PdfExportService {
     cell: ClueCell,
     options: CrosswordExportOptions
   ): void {
-    // Add colored indicator based on clue direction
-    const indicator = document.createElement('div');
-    indicator.style.position = 'absolute';
-    indicator.style.backgroundColor = '#666';
-    indicator.style.zIndex = '1';
-
-    switch (cell.clueDirection) {
-      case 'right':
-        indicator.style.left = '0';
-        indicator.style.top = '0';
-        indicator.style.width = '2px';
-        indicator.style.height = '100%';
-        break;
-      case 'down':
-        indicator.style.left = '0';
-        indicator.style.top = '0';
-        indicator.style.width = '100%';
-        indicator.style.height = '2px';
-        break;
-      case 'up':
-        indicator.style.left = '0';
-        indicator.style.bottom = '0';
-        indicator.style.width = '100%';
-        indicator.style.height = '2px';
-        break;
-      case 'left':
-        indicator.style.right = '0';
-        indicator.style.top = '0';
-        indicator.style.width = '2px';
-        indicator.style.height = '100%';
-        break;
-      case 'right-down':
-      case 'down-right':
-      case 'left-down':
-      case 'down-left':
-      case 'right-up':
-      case 'up-right':
-      case 'left-up':
-      case 'up-left':
-        // For 90° turns, use a corner indicator
-        indicator.style.left = '0';
-        indicator.style.top = '0';
-        indicator.style.width = '4px';
-        indicator.style.height = '4px';
-        indicator.style.borderRadius = '50%';
-        break;
-    }
-
-    cellDiv.appendChild(indicator);
-
     // Add clue text if it exists
     if (cell.clueText) {
       const clueContent = document.createElement('div');
@@ -358,8 +308,11 @@ export class PdfExportService {
       clueText.style.fontWeight = cell.boldClueText ? 'bold' : '500';
       clueText.style.overflowWrap = 'break-word';
       clueText.style.overflow = 'hidden';
-      clueText.style.height = '100%';
       clueText.style.width = '100%';
+      clueText.style.display = 'flex';
+      clueText.style.alignItems = 'center';
+      clueText.style.justifyContent = 'center';
+      clueText.style.flex = '1';
 
       clueContent.appendChild(clueText);
 
