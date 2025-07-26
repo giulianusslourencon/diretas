@@ -1,31 +1,29 @@
+import { CommonModule } from '@angular/common';
 import {
-  Component,
-  inject,
-  signal,
-  OnInit,
   ChangeDetectionStrategy,
+  Component,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import {
+  ClueDirection,
+  CrosswordCell,
+  CrosswordExportOptions,
+  CrosswordGrid,
+} from '../../core/models/crossword.model';
 import { CrosswordService } from '../../core/services/crossword.service';
 import { PdfExportService } from '../../core/services/pdf-export.service';
-import {
-  CrosswordGrid,
-  CrosswordCell,
-  AnswerCell,
-  ClueCell,
-  SplitCell,
-  CrosswordExportOptions,
-  ClueDirection,
-} from '../../core/models/crossword.model';
 import { CrosswordGridComponent, EditorPanelComponent } from './components';
 import {
   ActiveTriangle,
   CellClickEvent,
+  CellCycleState,
   CellRightClickEvent,
   TriangleClickEvent,
   TriangleKeydownEvent,
-  CellCycleState,
 } from './types/editor.types';
 
 @Component({
@@ -46,6 +44,7 @@ export class CrosswordEditorComponent implements OnInit {
   readonly selectedCell = signal<CrosswordCell | null>(null);
   readonly editingCell = signal<CrosswordCell | null>(null);
   readonly activeTriangle = signal<ActiveTriangle | null>(null);
+  readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   private isInteractingWithEditor = false;
 
   ngOnInit(): void {
@@ -287,7 +286,33 @@ export class CrosswordEditorComponent implements OnInit {
   saveChanges(): void {
     const current = this.crossword();
     if (current) {
-      this.crosswordService.updateCrossword(current);
+      this.saveStatus.set('saving');
+      try {
+        this.crosswordService.updateCrossword(current);
+        this.saveStatus.set('saved');
+
+        // Reset status after 2 seconds
+        setTimeout(() => {
+          this.saveStatus.set('idle');
+        }, 2000);
+      } catch (error) {
+        console.error('Failed to save crossword:', error);
+        this.saveStatus.set('error');
+
+        // Reset status after 3 seconds for error
+        setTimeout(() => {
+          this.saveStatus.set('idle');
+        }, 3000);
+      }
+    }
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent): void {
+    // Handle Ctrl+S (or Cmd+S on Mac) to save
+    if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault(); // Prevent browser's default save dialog
+      this.saveChanges();
     }
   }
 

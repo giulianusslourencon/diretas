@@ -10,7 +10,23 @@
       <h1>{{ crossword()!.title }}</h1>
     </div>
     <div class="header-right">
-      <button class="btn btn-primary" (click)="saveChanges()">Salvar</button>
+      <div class="save-section">
+        @if (saveStatus() === 'saving') {
+        <span class="save-status saving">Salvando...</span>
+        } @else if (saveStatus() === 'saved') {
+        <span class="save-status saved">✓ Salvo</span>
+        } @else if (saveStatus() === 'error') {
+        <span class="save-status error">✗ Erro ao salvar</span>
+        }
+        <button
+          class="btn btn-primary"
+          (click)="saveChanges()"
+          [disabled]="saveStatus() === 'saving'"
+        >
+          Salvar
+        </button>
+        <span class="keyboard-hint">Ctrl+S</span>
+      </div>
     </div>
   </header>
 

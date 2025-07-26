@@ -27,6 +27,47 @@
   }
 }
 
+.header-right {
+  .save-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .save-status {
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+
+      &.saving {
+        color: #0066cc;
+        background-color: #e6f3ff;
+      }
+
+      &.saved {
+        color: #28a745;
+        background-color: #d4edda;
+      }
+
+      &.error {
+        color: #dc3545;
+        background-color: #f8d7da;
+      }
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      color: #6c757d;
+      background-color: #f8f9fa;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      border: 1px solid #dee2e6;
+      font-family: monospace;
+    }
+  }
+}
+
 .editor-content {
   flex: 1;
   display: flex;
