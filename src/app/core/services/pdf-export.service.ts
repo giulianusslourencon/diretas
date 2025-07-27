@@ -151,6 +151,7 @@ export class PdfExportService {
     cellDiv.style.height = '60px';
     cellDiv.style.border = '1px solid #333';
     cellDiv.style.position = 'relative';
+    cellDiv.style.boxSizing = 'border-box';
     // Set background color based on cell type
     cellDiv.style.backgroundColor = this.isClueCell(cell)
       ? '#d0d0d0'
@@ -369,41 +370,49 @@ export class PdfExportService {
           path.setAttribute('d', 'M2 8 L8 8 L8 14 M5 11 L8 14 L11 11');
           arrowContainer.style.top = '25%';
           arrowContainer.style.right = '-16px';
+          arrowContainer.style.transform = 'none';
           break;
         case 'down-right':
           path.setAttribute('d', 'M8 2 L8 8 L14 8 M11 5 L14 8 L11 11');
           arrowContainer.style.bottom = '-16px';
           arrowContainer.style.left = '25%';
+          arrowContainer.style.transform = 'none';
           break;
         case 'left-down':
           path.setAttribute('d', 'M14 8 L8 8 L8 14 M11 11 L8 14 L5 11');
           arrowContainer.style.top = '25%';
           arrowContainer.style.left = '-16px';
+          arrowContainer.style.transform = 'none';
           break;
         case 'down-left':
           path.setAttribute('d', 'M8 2 L8 8 L2 8 M5 5 L2 8 L5 11');
           arrowContainer.style.bottom = '-16px';
           arrowContainer.style.right = '25%';
+          arrowContainer.style.transform = 'none';
           break;
         case 'right-up':
           path.setAttribute('d', 'M2 8 L8 8 L8 2 M5 5 L8 2 L11 5');
           arrowContainer.style.bottom = '25%';
           arrowContainer.style.right = '-16px';
+          arrowContainer.style.transform = 'none';
           break;
         case 'up-right':
           path.setAttribute('d', 'M8 14 L8 8 L14 8 M11 11 L14 8 L11 5');
           arrowContainer.style.top = '-16px';
           arrowContainer.style.left = '25%';
+          arrowContainer.style.transform = 'none';
           break;
         case 'left-up':
           path.setAttribute('d', 'M14 8 L8 8 L8 2 M11 5 L8 2 L5 5');
           arrowContainer.style.bottom = '25%';
           arrowContainer.style.left = '-16px';
+          arrowContainer.style.transform = 'none';
           break;
         case 'up-left':
           path.setAttribute('d', 'M8 14 L8 8 L2 8 M5 11 L2 8 L5 5');
           arrowContainer.style.top = '-16px';
           arrowContainer.style.right = '25%';
+          arrowContainer.style.transform = 'none';
           break;
       }
 
