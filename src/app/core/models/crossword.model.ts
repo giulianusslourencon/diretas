@@ -1,8 +1,8 @@
-export type ClueDirection =
-  | 'right'
-  | 'down'
-  | 'up'
-  | 'left'
+// Basic directional types
+export type BasicDirection = 'right' | 'down' | 'up' | 'left';
+
+// Compound directional types (turning arrows)
+export type CompoundDirection =
   | 'right-down'
   | 'down-right'
   | 'left-down'
@@ -11,6 +11,22 @@ export type ClueDirection =
   | 'up-right'
   | 'left-up'
   | 'up-left';
+
+// Union of all clue directions
+export type ClueDirection = BasicDirection | CompoundDirection;
+
+// Type guards for direction types
+export const isBasicDirection = (
+  direction: ClueDirection
+): direction is BasicDirection => {
+  return ['right', 'down', 'up', 'left'].includes(direction);
+};
+
+export const isCompoundDirection = (
+  direction: ClueDirection
+): direction is CompoundDirection => {
+  return !isBasicDirection(direction);
+};
 
 // Base interface for all cell types
 export interface BaseCrosswordCell {

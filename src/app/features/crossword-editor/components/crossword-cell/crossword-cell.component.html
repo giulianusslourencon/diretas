@@ -2,6 +2,7 @@
   class="grid-cell"
   [class.clue-cell]="isClueCell()"
   [class.split-cell]="isSplitCell()"
+  [class.highlighted]="isHighlighted()"
   [class.right-clue]="getClueCell()?.clueDirection === 'right'"
   [class.down-clue]="getClueCell()?.clueDirection === 'down'"
   [class.up-clue]="getClueCell()?.clueDirection === 'up'"

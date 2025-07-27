@@ -1,4 +1,4 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import {
   CrosswordGrid,
   CrosswordCell,
@@ -6,13 +6,17 @@ import {
   ClueCell,
   SplitCell,
   ClueDirection,
+  BasicDirection,
 } from '../models/crossword.model';
+import { GridPosition, ParsedDirection } from '../models/direction.model';
+import { DirectionService } from './direction.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CrosswordService {
   private readonly STORAGE_KEY = 'diretas-crosswords';
+  private readonly directionService = inject(DirectionService);
 
   private crosswords = signal<CrosswordGrid[]>([]);
   readonly crosswordList = computed(() => this.crosswords());
@@ -140,6 +144,88 @@ export class CrosswordService {
 
   isSplitCell(cell: CrosswordCell): cell is SplitCell {
     return cell.type === 'split';
+  }
+
+  // Get cells that should be highlighted when a clue cell is selected
+  getHighlightedCells(
+    clueCell: ClueCell,
+    grid: CrosswordGrid
+  ): CrosswordCell[] {
+    return this.getHighlightedCellsForDirection(
+      clueCell.row,
+      clueCell.col,
+      clueCell.clueDirection,
+      grid
+    );
+  }
+
+  private getHighlightedCellsForDirection(
+    startRow: number,
+    startCol: number,
+    direction: ClueDirection,
+    grid: CrosswordGrid
+  ): CrosswordCell[] {
+    // Parse the direction to get the final direction and starting position
+    const { finalDirection, startingPosition } = this.parseDirection(
+      direction,
+      startRow,
+      startCol
+    );
+
+    // Traverse in the final direction from the calculated starting position
+    return this.traverseInDirection(
+      startingPosition.row,
+      startingPosition.col,
+      finalDirection,
+      grid
+    );
+  }
+
+  private parseDirection(
+    direction: ClueDirection,
+    startRow: number,
+    startCol: number
+  ): ParsedDirection {
+    const startingPosition: GridPosition = { row: startRow, col: startCol };
+    return this.directionService.parseClueDirection(
+      direction,
+      startingPosition
+    );
+  }
+
+  private traverseInDirection(
+    startRow: number,
+    startCol: number,
+    direction: BasicDirection,
+    grid: CrosswordGrid
+  ): CrosswordCell[] {
+    const cells: CrosswordCell[] = [];
+    const { rows, cols, cells: gridCells } = grid;
+
+    // Start from the given position (already offset for compound directions)
+    let currentPosition: GridPosition = { row: startRow, col: startCol };
+
+    while (this.directionService.isValidPosition(currentPosition, rows, cols)) {
+      const cell = gridCells[currentPosition.row][currentPosition.col];
+
+      // Stop if we hit another clue cell
+      if (this.isClueCell(cell)) {
+        break;
+      }
+
+      // Add answer and split cells to highlight
+      if (this.isAnswerCell(cell) || this.isSplitCell(cell)) {
+        cells.push(cell);
+      }
+
+      // Move to next position
+      currentPosition = this.directionService.getNextPosition(
+        currentPosition,
+        direction
+      );
+    }
+
+    return cells;
   }
 
   private loadFromStorage(): void {

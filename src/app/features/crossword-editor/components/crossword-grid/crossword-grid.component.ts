@@ -30,6 +30,7 @@ export class CrosswordGridComponent {
   readonly selectedCell = input<CrosswordCell | null>(null);
   readonly editingCell = input<CrosswordCell | null>(null);
   readonly activeTriangle = input<ActiveTriangle | null>(null);
+  readonly highlightedCells = input<CrosswordCell[]>([]);
 
   readonly cellClick = output<CellClickEvent>();
   readonly cellDoubleClick = output<CellClickEvent>();
@@ -90,6 +91,11 @@ export class CrosswordGridComponent {
   isCellEditing(cell: CrosswordCell): boolean {
     const editing = this.editingCell();
     return editing === cell;
+  }
+
+  isCellHighlighted(cell: CrosswordCell): boolean {
+    const highlighted = this.highlightedCells();
+    return highlighted.includes(cell);
   }
 
   onAnswerLetterChange(data: {

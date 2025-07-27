@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   HostListener,
   inject,
   OnInit,
@@ -46,6 +47,22 @@ export class CrosswordEditorComponent implements OnInit {
   readonly activeTriangle = signal<ActiveTriangle | null>(null);
   readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   private isInteractingWithEditor = false;
+
+  // Computed signal for highlighted cells when a clue cell is selected
+  readonly highlightedCells = computed(() => {
+    const selectedCell = this.selectedCell();
+    const crossword = this.crossword();
+
+    if (
+      !selectedCell ||
+      !crossword ||
+      !this.crosswordService.isClueCell(selectedCell)
+    ) {
+      return [];
+    }
+
+    return this.crosswordService.getHighlightedCells(selectedCell, crossword);
+  });
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

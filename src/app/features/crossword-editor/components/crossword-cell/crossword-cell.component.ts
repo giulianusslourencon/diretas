@@ -29,6 +29,7 @@ export class CrosswordCellComponent {
   readonly colIndex = input.required<number>();
   readonly isSelected = input<boolean>(false);
   readonly isEditing = input<boolean>(false);
+  readonly isHighlighted = input<boolean>(false);
   readonly activeTriangle = input<ActiveTriangle | null>(null);
 
   readonly cellClick = output<{ row: number; col: number }>();

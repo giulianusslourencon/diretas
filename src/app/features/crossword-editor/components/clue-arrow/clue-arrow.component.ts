@@ -1,5 +1,11 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { ClueDirection } from '../../../../core/models/crossword.model';
+import {
+  ClueDirection,
+  BasicDirection,
+  CompoundDirection,
+  isBasicDirection,
+  isCompoundDirection,
+} from '../../../../core/models/crossword.model';
 
 @Component({
   selector: 'app-clue-arrow',
@@ -8,5 +14,18 @@ import { ClueDirection } from '../../../../core/models/crossword.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ClueArrowComponent {
-  direction = input.required<ClueDirection>();
+  readonly direction = input.required<ClueDirection>();
+
+  // Type-safe helper methods for template
+  protected isBasicDirection(): boolean {
+    return isBasicDirection(this.direction());
+  }
+
+  protected isCompoundDirection(): boolean {
+    return isCompoundDirection(this.direction());
+  }
+
+  protected getDirectionType(): 'basic' | 'compound' {
+    return this.isBasicDirection() ? 'basic' : 'compound';
+  }
 }
