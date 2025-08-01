@@ -90,6 +90,39 @@ export class PdfExportService {
       const imgData = canvas.toDataURL('image/png');
       pdf.addImage(imgData, 'PNG', x, y, finalWidth, finalHeight);
 
+      // Add footer with "Feito com ❤ por Giuzinho"
+      pdf.setFontSize(10);
+      pdf.setFont('helvetica', 'italic');
+      pdf.setTextColor(128, 128, 128); // Gray color
+
+      // Draw "Feito com " first
+      const leftText = 'Feito com ';
+      const rightText = ' por Giuzinho';
+      const textWidth = pdf.getTextWidth(leftText + rightText);
+      const startX = (pageWidth - textWidth - 3) / 2; // 3mm for heart width
+
+      pdf.text(leftText, startX, pageHeight - 10);
+
+      // Draw a simple heart shape
+      const heartX = startX + pdf.getTextWidth(leftText) + 1;
+      const heartY = pageHeight - 12;
+
+      pdf.setFillColor(128, 128, 128);
+      pdf.circle(heartX, heartY, 1, 'F');
+      pdf.circle(heartX + 1.5, heartY, 1, 'F');
+      pdf.triangle(
+        heartX - 0.5,
+        heartY + 0.5,
+        heartX + 2,
+        heartY + 0.5,
+        heartX + 0.75,
+        heartY + 2.5,
+        'F'
+      );
+
+      // Draw " por Giuzinho"
+      pdf.text(rightText, heartX + 3, pageHeight - 10);
+
       // Save the PDF
       const fileName = `${crossword.title
         .replace(/[^a-z0-9]/gi, '_')
@@ -340,7 +373,7 @@ export class PdfExportService {
       path.setAttribute('stroke-linecap', 'round');
       path.setAttribute('stroke-linejoin', 'round');
 
-      // Set path data and positioning based on direction
+      // Set path data and positioning based on direction (same as editor)
       switch (cell.clueDirection) {
         case 'right':
           path.setAttribute('d', 'M2 8 L12 8 M9 5 L12 8 L9 11');
@@ -350,13 +383,13 @@ export class PdfExportService {
           break;
         case 'down':
           path.setAttribute('d', 'M8 2 L8 12 M5 9 L8 12 L11 9');
-          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.bottom = '-12px';
           arrowContainer.style.left = '50%';
           arrowContainer.style.transform = 'translateX(-50%)';
           break;
         case 'up':
           path.setAttribute('d', 'M8 14 L8 4 M5 7 L8 4 L11 7');
-          arrowContainer.style.top = '-16px';
+          arrowContainer.style.top = '-20px';
           arrowContainer.style.left = '50%';
           arrowContainer.style.transform = 'translateX(-50%)';
           break;
@@ -374,7 +407,7 @@ export class PdfExportService {
           break;
         case 'down-right':
           path.setAttribute('d', 'M8 2 L8 8 L14 8 M11 5 L14 8 L11 11');
-          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.bottom = '-12px';
           arrowContainer.style.left = '25%';
           arrowContainer.style.transform = 'none';
           break;
@@ -386,7 +419,7 @@ export class PdfExportService {
           break;
         case 'down-left':
           path.setAttribute('d', 'M8 2 L8 8 L2 8 M5 5 L2 8 L5 11');
-          arrowContainer.style.bottom = '-16px';
+          arrowContainer.style.bottom = '-12px';
           arrowContainer.style.right = '25%';
           arrowContainer.style.transform = 'none';
           break;
@@ -398,7 +431,7 @@ export class PdfExportService {
           break;
         case 'up-right':
           path.setAttribute('d', 'M8 14 L8 8 L14 8 M11 11 L14 8 L11 5');
-          arrowContainer.style.top = '-16px';
+          arrowContainer.style.top = '-20px';
           arrowContainer.style.left = '25%';
           arrowContainer.style.transform = 'none';
           break;
@@ -410,7 +443,7 @@ export class PdfExportService {
           break;
         case 'up-left':
           path.setAttribute('d', 'M8 14 L8 8 L2 8 M5 11 L2 8 L5 5');
-          arrowContainer.style.top = '-16px';
+          arrowContainer.style.top = '-20px';
           arrowContainer.style.right = '25%';
           arrowContainer.style.transform = 'none';
           break;
