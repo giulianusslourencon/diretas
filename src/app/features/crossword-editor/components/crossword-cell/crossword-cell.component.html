@@ -113,6 +113,7 @@
     maxlength="1"
     [value]="getAnswerLetter()"
     (input)="onAnswerInput($event)"
+    (keydown)="onAnswerKeydown($event)"
     (focus)="onCellFocus()"
   />
   }

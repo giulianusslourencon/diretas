@@ -60,6 +60,11 @@ export class CrosswordCellComponent {
     col: number;
     letter: string;
   }>();
+  readonly answerKeydown = output<{
+    event: KeyboardEvent;
+    row: number;
+    col: number;
+  }>();
 
   onCellClick(): void {
     this.cellClick.emit({ row: this.rowIndex(), col: this.colIndex() });
@@ -118,6 +123,14 @@ export class CrosswordCellComponent {
       row: this.rowIndex(),
       col: this.colIndex(),
       letter: letter,
+    });
+  }
+
+  onAnswerKeydown(event: KeyboardEvent): void {
+    this.answerKeydown.emit({
+      event,
+      row: this.rowIndex(),
+      col: this.colIndex(),
     });
   }
 

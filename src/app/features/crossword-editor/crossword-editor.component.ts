@@ -330,6 +330,88 @@ export class CrosswordEditorComponent implements OnInit {
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {
       event.preventDefault(); // Prevent browser's default save dialog
       this.saveChanges();
+      return;
+    }
+
+    // Handle arrow key navigation
+    if (this.isArrowKey(event.key)) {
+      // Don't handle arrow keys if user is editing a clue input or triangle input
+      // But DO handle them for answer cell inputs (cell-input)
+      const activeElement = document.activeElement;
+      if (
+        activeElement?.classList.contains('clue-input') ||
+        activeElement?.classList.contains('triangle-input')
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      this.handleArrowKeyNavigation(event.key);
+    }
+  }
+
+  private isArrowKey(key: string): boolean {
+    return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key);
+  }
+
+  private handleArrowKeyNavigation(key: string): void {
+    const crossword = this.crossword();
+    const currentSelected = this.selectedCell();
+
+    if (!crossword || !currentSelected) {
+      // If no cell is selected, select the first cell (0,0)
+      if (crossword) {
+        const firstCell = crossword.cells[0][0];
+        this.selectedCell.set(firstCell);
+        this.focusCellIfNeeded(firstCell);
+      }
+      return;
+    }
+
+    const { row, col } = currentSelected;
+    let newRow = row;
+    let newCol = col;
+
+    // Calculate new position based on arrow key
+    switch (key) {
+      case 'ArrowUp':
+        newRow = Math.max(0, row - 1);
+        break;
+      case 'ArrowDown':
+        newRow = Math.min(crossword.rows - 1, row + 1);
+        break;
+      case 'ArrowLeft':
+        newCol = Math.max(0, col - 1);
+        break;
+      case 'ArrowRight':
+        newCol = Math.min(crossword.cols - 1, col + 1);
+        break;
+    }
+
+    // Only move if the position actually changed
+    if (newRow !== row || newCol !== col) {
+      const newCell = crossword.cells[newRow][newCol];
+      this.selectedCell.set(newCell);
+
+      // Clear any active editing states when navigating
+      this.editingCell.set(null);
+      this.activeTriangle.set(null);
+
+      // Focus the new cell if it's an answer cell
+      this.focusCellIfNeeded(newCell);
+    }
+  }
+
+  private focusCellIfNeeded(cell: CrosswordCell): void {
+    // Only auto-focus answer cells for immediate typing
+    if (this.crosswordService.isAnswerCell(cell)) {
+      setTimeout(() => {
+        const cellSelector = `[data-cell="${cell.row}-${cell.col}"] .cell-input`;
+        const input = document.querySelector(cellSelector) as HTMLInputElement;
+        if (input) {
+          input.focus();
+        }
+      }, 10);
     }
   }
 
@@ -663,6 +745,66 @@ export class CrosswordEditorComponent implements OnInit {
     const selectedCell = this.selectedCell();
     if (selectedCell && selectedCell.row === row && selectedCell.col === col) {
       this.selectedCell.set(newCell);
+    }
+  }
+
+  onAnswerKeydown(data: {
+    event: KeyboardEvent;
+    row: number;
+    col: number;
+  }): void {
+    const { event, row, col } = data;
+    const crossword = this.crossword();
+    if (!crossword) return;
+
+    // Don't handle arrow keys here - let the global handler do it
+    // This prevents double navigation
+    if (this.isArrowKey(event.key)) {
+      return; // Let the global @HostListener handle arrow keys
+    }
+
+    // Handle letter input - automatically move to next cell after typing
+    if (event.key.length === 1 && event.key.match(/[a-zA-Z]/)) {
+      // Let the input event handle the letter change first
+      setTimeout(() => {
+        // Move to the next logical cell (right, then down to next row)
+        const newCol = col + 1;
+        if (newCol < crossword.cols) {
+          // Move right
+          const nextCell = crossword.cells[row][newCol];
+          this.selectedCell.set(nextCell);
+          this.focusCellIfNeeded(nextCell);
+        } else if (row + 1 < crossword.rows) {
+          // Move to beginning of next row
+          const nextCell = crossword.cells[row + 1][0];
+          this.selectedCell.set(nextCell);
+          this.focusCellIfNeeded(nextCell);
+        }
+      }, 0);
+    }
+    // Handle backspace - move to previous cell if current cell is empty
+    else if (event.key === 'Backspace') {
+      const cell = crossword.cells[row][col];
+      if (this.crosswordService.isAnswerCell(cell) && !cell.letter) {
+        event.preventDefault();
+        // Move to previous cell
+        const newCol = col - 1;
+        if (newCol >= 0) {
+          // Move left
+          const prevCell = crossword.cells[row][newCol];
+          this.selectedCell.set(prevCell);
+          this.focusCellIfNeeded(prevCell);
+          // Clear the previous cell
+          this.clearCell(row, newCol);
+        } else if (row - 1 >= 0) {
+          // Move to end of previous row
+          const prevCell = crossword.cells[row - 1][crossword.cols - 1];
+          this.selectedCell.set(prevCell);
+          this.focusCellIfNeeded(prevCell);
+          // Clear the previous cell
+          this.clearCell(row - 1, crossword.cols - 1);
+        }
+      }
     }
   }
 }

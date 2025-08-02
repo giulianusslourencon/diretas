@@ -46,6 +46,11 @@ export class CrosswordGridComponent {
     col: number;
     letter: string;
   }>();
+  readonly answerKeydown = output<{
+    event: KeyboardEvent;
+    row: number;
+    col: number;
+  }>();
 
   onCellClick(data: CellClickEvent): void {
     this.cellClick.emit(data);
@@ -104,5 +109,13 @@ export class CrosswordGridComponent {
     letter: string;
   }): void {
     this.answerLetterChange.emit(data);
+  }
+
+  onAnswerKeydown(data: {
+    event: KeyboardEvent;
+    row: number;
+    col: number;
+  }): void {
+    this.answerKeydown.emit(data);
   }
 }
