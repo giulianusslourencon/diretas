@@ -3,9 +3,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  HostListener,
   inject,
   OnInit,
+  OnDestroy,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -35,7 +35,7 @@ import {
   styleUrl: './crossword-editor.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CrosswordEditorComponent implements OnInit {
+export class CrosswordEditorComponent implements OnInit, OnDestroy {
   private readonly crosswordService = inject(CrosswordService);
   private readonly pdfExportService = inject(PdfExportService);
   private readonly fileManagerService = inject(FileManagerService);
@@ -49,6 +49,7 @@ export class CrosswordEditorComponent implements OnInit {
   readonly activeTriangle = signal<ActiveTriangle | null>(null);
   readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   private isInteractingWithEditor = false;
+  private keydownListener?: (event: KeyboardEvent) => void;
 
   // Computed signal for highlighted cells when a clue cell is selected
   readonly highlightedCells = computed(() => {
@@ -88,6 +89,17 @@ export class CrosswordEditorComponent implements OnInit {
     }
 
     this.isLoading.set(false);
+
+    // Add keyboard event listener
+    this.keydownListener = (event: KeyboardEvent) => this.onKeyDown(event);
+    document.addEventListener('keydown', this.keydownListener);
+  }
+
+  ngOnDestroy(): void {
+    // Remove keyboard event listener
+    if (this.keydownListener) {
+      document.removeEventListener('keydown', this.keydownListener);
+    }
   }
 
   onCellClick(data: CellClickEvent): void {
@@ -326,7 +338,6 @@ export class CrosswordEditorComponent implements OnInit {
     }
   }
 
-  @HostListener('document:keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
     // Handle Ctrl+S (or Cmd+S on Mac) to save
     if ((event.ctrlKey || event.metaKey) && event.key === 's') {

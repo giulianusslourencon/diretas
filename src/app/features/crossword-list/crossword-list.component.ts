@@ -3,7 +3,8 @@ import {
   inject,
   signal,
   ElementRef,
-  ViewChild,
+  viewChild,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -17,13 +18,15 @@ import { CrosswordGrid } from '../../core/models/crossword.model';
   imports: [CommonModule, FormsModule],
   templateUrl: './crossword-list.component.html',
   styleUrl: './crossword-list.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CrosswordListComponent {
   private readonly crosswordService = inject(CrosswordService);
   private readonly fileManagerService = inject(FileManagerService);
   private readonly router = inject(Router);
 
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  readonly fileInput =
+    viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
   readonly crosswords = this.crosswordService.crosswordList;
   readonly showNewCrosswordDialog = signal(false);
@@ -83,7 +86,7 @@ export class CrosswordListComponent {
   }
 
   onImportFromFile(): void {
-    this.fileInput.nativeElement.click();
+    this.fileInput().nativeElement.click();
   }
 
   async onFileSelected(event: Event): Promise<void> {
@@ -104,7 +107,7 @@ export class CrosswordListComponent {
 
       // Gerar novo ID para evitar conflitos
       const newId =
-        Date.now().toString(36) + Math.random().toString(36).substr(2);
+        Date.now().toString(36) + Math.random().toString(36).substring(2);
       const crosswordToSave: CrosswordGrid = {
         ...importedCrossword,
         id: newId,

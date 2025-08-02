@@ -1,4 +1,4 @@
-import { Injectable, signal, computed, inject } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import {
   CrosswordGrid,
   CrosswordCell,
@@ -23,6 +23,16 @@ export class CrosswordService {
 
   constructor() {
     this.loadFromStorage();
+
+    // Auto-save when crosswords change (but skip initial load)
+    let isInitialLoad = true;
+    effect(() => {
+      const crosswords = this.crosswords();
+      if (!isInitialLoad && crosswords.length >= 0) {
+        this.saveToStorage();
+      }
+      isInitialLoad = false;
+    });
   }
 
   createNewCrossword(title: string, rows: number, cols: number): CrosswordGrid {
@@ -87,7 +97,7 @@ export class CrosswordService {
   }
 
   private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    return Date.now().toString(36) + Math.random().toString(36).substring(2);
   }
 
   // Helper functions for cell type management
