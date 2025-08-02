@@ -51,11 +51,15 @@ const SplitCellSchema = z.object({
   diagonalDirection: z.enum(['main', 'anti']),
 });
 
-const CrosswordCellSchema = z.union([
+const CrosswordCellSchema = z.discriminatedUnion('type', [
   AnswerCellSchema,
   ClueCellSchema,
   SplitCellSchema,
 ]);
+
+const DateSchema = z
+  .union([z.string(), z.date()])
+  .transform((val) => (typeof val === 'string' ? new Date(val) : val));
 
 const CrosswordGridSchema = z
   .object({
@@ -65,12 +69,8 @@ const CrosswordGridSchema = z
     rows: z.number().int().min(1).max(50),
     cols: z.number().int().min(1).max(50),
     cells: z.array(z.array(CrosswordCellSchema)),
-    createdAt: z
-      .union([z.string(), z.date()])
-      .transform((val) => (typeof val === 'string' ? new Date(val) : val)),
-    updatedAt: z
-      .union([z.string(), z.date()])
-      .transform((val) => (typeof val === 'string' ? new Date(val) : val)),
+    createdAt: DateSchema,
+    updatedAt: DateSchema,
   })
   .refine(
     (data) => {
@@ -97,7 +97,7 @@ const CrosswordGridSchema = z
       return true;
     },
     {
-      message:
+      error:
         'As dimensões da grade não correspondem ao array de células ou as coordenadas das células estão incorretas',
     }
   );
