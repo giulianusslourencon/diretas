@@ -230,7 +230,7 @@ export class PdfExportService {
     const leftText = 'Feito com ';
     const rightText = ' por Giuzinho';
     const textWidth = pdf.getTextWidth(leftText + rightText);
-    const startX = (pageWidth - textWidth - 3) / 2; // 3mm for heart width
+    const startX = (pageWidth - textWidth - 4) / 2; // 4mm for heart width
 
     pdf.text(leftText, startX, pageHeight - 10);
 
@@ -239,20 +239,20 @@ export class PdfExportService {
     const heartY = pageHeight - 12;
 
     pdf.setFillColor(128, 128, 128);
-    pdf.circle(heartX, heartY, 1, 'F');
-    pdf.circle(heartX + 1.5, heartY, 1, 'F');
+    pdf.circle(heartX, heartY, 1.2, 'F');
+    pdf.circle(heartX + 1.8, heartY, 1.2, 'F');
     pdf.triangle(
-      heartX - 0.5,
-      heartY + 0.5,
-      heartX + 2,
-      heartY + 0.5,
-      heartX + 0.75,
-      heartY + 2.5,
+      heartX - 0.8,
+      heartY + 0.8,
+      heartX + 2.6,
+      heartY + 0.8,
+      heartX + 0.9,
+      heartY + 3.5,
       'F'
     );
 
     // Draw " por Giuzinho"
-    pdf.text(rightText, heartX + 3, pageHeight - 10);
+    pdf.text(rightText, heartX + 3.8, pageHeight - 10);
   }
 
   private addDoubleFooter(
@@ -274,7 +274,7 @@ export class PdfExportService {
     const textWidth = pdf.getTextWidth(leftText + rightText);
 
     // Left grid footer
-    const leftStartX = leftGridX + (gridWidth - textWidth - 3) / 2; // 3mm for heart width
+    const leftStartX = leftGridX + (gridWidth - textWidth - 3.5) / 2; // 3.5mm for heart width
     pdf.text(leftText, leftStartX, pageHeight - 10);
 
     // Draw a simple heart shape for left grid
@@ -282,42 +282,42 @@ export class PdfExportService {
     const heartY = pageHeight - 12;
 
     pdf.setFillColor(128, 128, 128);
-    pdf.circle(leftHeartX, heartY, 0.8, 'F');
-    pdf.circle(leftHeartX + 1.2, heartY, 0.8, 'F');
+    pdf.circle(leftHeartX, heartY, 1, 'F');
+    pdf.circle(leftHeartX + 1.5, heartY, 1, 'F');
     pdf.triangle(
-      leftHeartX - 0.4,
-      heartY + 0.4,
-      leftHeartX + 1.6,
-      heartY + 0.4,
-      leftHeartX + 0.6,
-      heartY + 2,
+      leftHeartX - 0.7,
+      heartY + 0.6,
+      leftHeartX + 2.2,
+      heartY + 0.6,
+      leftHeartX + 0.75,
+      heartY + 2.8,
       'F'
     );
 
     // Draw " por Giuzinho" for left grid
-    pdf.text(rightText, leftHeartX + 2.4, pageHeight - 10);
+    pdf.text(rightText, leftHeartX + 3, pageHeight - 10);
 
     // Right grid footer
-    const rightStartX = rightGridX + (gridWidth - textWidth - 3) / 2; // 3mm for heart width
+    const rightStartX = rightGridX + (gridWidth - textWidth - 3.5) / 2; // 3.5mm for heart width
     pdf.text(leftText, rightStartX, pageHeight - 10);
 
     // Draw a simple heart shape for right grid
     const rightHeartX = rightStartX + pdf.getTextWidth(leftText) + 1;
 
-    pdf.circle(rightHeartX, heartY, 0.8, 'F');
-    pdf.circle(rightHeartX + 1.2, heartY, 0.8, 'F');
+    pdf.circle(rightHeartX, heartY, 1, 'F');
+    pdf.circle(rightHeartX + 1.5, heartY, 1, 'F');
     pdf.triangle(
-      rightHeartX - 0.4,
-      heartY + 0.4,
-      rightHeartX + 1.6,
-      heartY + 0.4,
-      rightHeartX + 0.6,
-      heartY + 2,
+      rightHeartX - 0.7,
+      heartY + 0.6,
+      rightHeartX + 2.2,
+      heartY + 0.6,
+      rightHeartX + 0.75,
+      heartY + 2.8,
       'F'
     );
 
     // Draw " por Giuzinho" for right grid
-    pdf.text(rightText, rightHeartX + 2.4, pageHeight - 10);
+    pdf.text(rightText, rightHeartX + 3, pageHeight - 10);
   }
 
   private createTempContainer(
