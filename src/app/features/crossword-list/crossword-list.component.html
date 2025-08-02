@@ -1,9 +1,35 @@
 <div class="crossword-list-container">
   <header class="page-header">
     <h1>Palavras Cruzadas Diretas</h1>
-    <button class="btn btn-primary" (click)="openNewCrosswordDialog()">
-      Nova Palavra Cruzada
-    </button>
+    <div class="header-actions">
+      <div class="import-section">
+        <button
+          class="btn btn-secondary"
+          (click)="onImportFromFile()"
+          [disabled]="importStatus() === 'importing'"
+        >
+          @if (importStatus() === 'importing') { ⏳ Importando... } @else { 📁
+          Importar Arquivo }
+        </button>
+        @if (importStatus() === 'success') {
+        <span class="import-status success"
+          >✓ Arquivo importado com sucesso!</span
+        >
+        } @else if (importStatus() === 'error') {
+        <span class="import-status error">✗ {{ importError() }}</span>
+        }
+      </div>
+      <button class="btn btn-primary" (click)="openNewCrosswordDialog()">
+        Nova Palavra Cruzada
+      </button>
+    </div>
+    <input
+      #fileInput
+      type="file"
+      accept=".json"
+      (change)="onFileSelected($event)"
+      style="display: none"
+    />
   </header>
 
   <main class="crossword-grid">

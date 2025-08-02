@@ -27,6 +27,7 @@ export class EditorPanelComponent {
 
   readonly clearCell = output<void>();
   readonly saveChanges = output<void>();
+  readonly saveToFile = output<void>();
   readonly exportToPdf = output<CrosswordExportOptions>();
   readonly editorMouseDown = output<void>();
   readonly editorMouseUp = output<void>();
@@ -48,6 +49,10 @@ export class EditorPanelComponent {
 
   onSaveChanges(): void {
     this.saveChanges.emit();
+  }
+
+  onSaveToFile(): void {
+    this.saveToFile.emit();
   }
 
   onExportToPdf(): void {

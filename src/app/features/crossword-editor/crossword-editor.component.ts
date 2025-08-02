@@ -17,6 +17,7 @@ import {
 } from '../../core/models/crossword.model';
 import { CrosswordService } from '../../core/services/crossword.service';
 import { PdfExportService } from '../../core/services/pdf-export.service';
+import { FileManagerService } from '../../core/services/file-manager.service';
 import { CrosswordGridComponent, EditorPanelComponent } from './components';
 import {
   ActiveTriangle,
@@ -37,6 +38,7 @@ import {
 export class CrosswordEditorComponent implements OnInit {
   private readonly crosswordService = inject(CrosswordService);
   private readonly pdfExportService = inject(PdfExportService);
+  private readonly fileManagerService = inject(FileManagerService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -581,6 +583,21 @@ export class CrosswordEditorComponent implements OnInit {
       await this.pdfExportService.exportCrosswordToPdf(crossword, options);
     } catch (error) {
       console.error('Failed to export crossword to PDF:', error);
+      // You could add a toast notification here to inform the user
+    }
+  }
+
+  onSaveToFile(): void {
+    const crossword = this.crossword();
+    if (!crossword) {
+      console.error('No crossword available for file export');
+      return;
+    }
+
+    try {
+      this.fileManagerService.saveToFile(crossword);
+    } catch (error) {
+      console.error('Failed to save crossword to file:', error);
       // You could add a toast notification here to inform the user
     }
   }

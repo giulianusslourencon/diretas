@@ -126,8 +126,17 @@
   </div>
   }
 
+  <div class="file-panel">
+    <h3>Arquivo</h3>
+    <div class="file-actions">
+      <button class="btn btn-primary" (click)="onSaveToFile()">
+        💾 Salvar em Arquivo
+      </button>
+    </div>
+  </div>
+
   <div class="export-panel">
-    <h3>Exportar</h3>
+    <h3>Exportar PDF</h3>
     <div class="export-actions">
       <button class="btn btn-success" (click)="onExportToPdf()">
         📄 Exportar para PDF

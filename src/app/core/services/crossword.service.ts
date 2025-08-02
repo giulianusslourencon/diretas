@@ -81,6 +81,11 @@ export class CrosswordService {
     this.saveToStorage();
   }
 
+  addCrossword(crossword: CrosswordGrid): void {
+    this.crosswords.update((crosswords) => [...crosswords, crossword]);
+    this.saveToStorage();
+  }
+
   private generateId(): string {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
