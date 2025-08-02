@@ -141,6 +141,28 @@
           />
           Incluir respostas
         </label>
+
+        <label class="select-label">
+          Layout:
+          <select
+            [value]="exportOptions().layout"
+            (change)="updateExportOption('layout', $event)"
+          >
+            <option value="single">Grade única</option>
+            <option value="double">Duas grades (pergunta + gabarito)</option>
+          </select>
+        </label>
+
+        <label class="select-label">
+          Orientação:
+          <select
+            [value]="exportOptions().orientation"
+            (change)="updateExportOption('orientation', $event)"
+          >
+            <option value="portrait">Retrato</option>
+            <option value="landscape">Paisagem</option>
+          </select>
+        </label>
       </div>
     </div>
   </div>

@@ -38,6 +38,8 @@ export class EditorPanelComponent {
 
   readonly exportOptions = signal<CrosswordExportOptions>({
     includeAnswers: false,
+    layout: 'single',
+    orientation: 'portrait',
   });
 
   onClearCell(): void {
@@ -53,13 +55,19 @@ export class EditorPanelComponent {
   }
 
   updateExportOption(option: keyof CrosswordExportOptions, event: Event): void {
-    const target = event.target as HTMLInputElement;
+    const target = event.target as HTMLInputElement | HTMLSelectElement;
     const currentOptions = this.exportOptions();
 
     if (option === 'includeAnswers') {
+      const checkbox = target as HTMLInputElement;
       this.exportOptions.set({
         ...currentOptions,
-        [option]: target.checked,
+        [option]: checkbox.checked,
+      });
+    } else if (option === 'layout' || option === 'orientation') {
+      this.exportOptions.set({
+        ...currentOptions,
+        [option]: target.value as any,
       });
     }
   }

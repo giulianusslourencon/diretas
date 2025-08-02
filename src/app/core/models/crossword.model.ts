@@ -74,4 +74,6 @@ export interface CrosswordGrid {
 
 export interface CrosswordExportOptions {
   includeAnswers: boolean;
+  layout?: 'single' | 'double'; // single grid or double grid (side by side)
+  orientation?: 'portrait' | 'landscape'; // page orientation
 }
