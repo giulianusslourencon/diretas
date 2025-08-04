@@ -48,6 +48,8 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
   readonly editingCell = signal<CrosswordCell | null>(null);
   readonly activeTriangle = signal<ActiveTriangle | null>(null);
   readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  readonly isEditingTitle = signal(false);
+  readonly titleInputValue = signal('');
   private isInteractingWithEditor = false;
   private keydownListener?: (event: KeyboardEvent) => void;
 
@@ -744,6 +746,64 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
     crossword.cells[selectedCell.row][selectedCell.col] = newCell;
     this.crossword.set({ ...crossword });
     this.selectedCell.set(newCell);
+  }
+
+  // Title editing methods
+  startEditingTitle(): void {
+    const crossword = this.crossword();
+    if (crossword) {
+      this.titleInputValue.set(crossword.title);
+      this.isEditingTitle.set(true);
+      // Focus the input after the view updates
+      setTimeout(() => {
+        const input = document.getElementById(
+          'title-input'
+        ) as HTMLInputElement;
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 0);
+    }
+  }
+
+  cancelTitleEdit(): void {
+    this.isEditingTitle.set(false);
+    this.titleInputValue.set('');
+  }
+
+  saveTitleEdit(): void {
+    const crossword = this.crossword();
+    const newTitle = this.titleInputValue().trim();
+
+    if (crossword && newTitle && newTitle !== crossword.title) {
+      const updatedCrossword = { ...crossword, title: newTitle };
+      this.crossword.set(updatedCrossword);
+      this.crosswordService.updateCrossword(updatedCrossword);
+    }
+
+    this.isEditingTitle.set(false);
+    this.titleInputValue.set('');
+  }
+
+  onTitleInputChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.titleInputValue.set(target.value);
+  }
+
+  onTitleInputKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      this.saveTitleEdit();
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      this.cancelTitleEdit();
+    }
+  }
+
+  onTitleInputBlur(): void {
+    // Save the title when the input loses focus
+    this.saveTitleEdit();
   }
 
   onAnswerLetterChange(data: {

@@ -7,7 +7,28 @@
   <header class="editor-header">
     <div class="header-left">
       <button class="btn btn-secondary" (click)="goBack()">← Voltar</button>
-      <h1>{{ crossword()!.title }}</h1>
+      @if (isEditingTitle()) {
+      <input
+        id="title-input"
+        type="text"
+        class="title-input"
+        [value]="titleInputValue()"
+        (input)="onTitleInputChange($event)"
+        (keydown)="onTitleInputKeydown($event)"
+        (blur)="onTitleInputBlur()"
+        placeholder="Digite o título da palavra cruzada"
+        maxlength="100"
+      />
+      } @else {
+      <h1
+        class="editable-title"
+        (click)="startEditingTitle()"
+        title="Clique para editar o título"
+      >
+        {{ crossword()!.title }}
+        <span class="edit-icon">✏️</span>
+      </h1>
+      }
     </div>
     <div class="header-right">
       <div class="save-section">
