@@ -50,6 +50,9 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
   readonly saveStatus = signal<'idle' | 'saving' | 'saved' | 'error'>('idle');
   readonly isEditingTitle = signal(false);
   readonly titleInputValue = signal('');
+  readonly navigationDirection = signal<'right' | 'down' | 'left' | 'up'>(
+    'right'
+  );
   private isInteractingWithEditor = false;
   private keydownListener?: (event: KeyboardEvent) => void;
 
@@ -348,14 +351,27 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Handle Space to toggle navigation direction (only when not editing any input)
+    if (
+      event.key === ' ' &&
+      !this.isEditingInputExceptAnswerCells() &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      event.preventDefault();
+      this.toggleNavigationDirection();
+      return;
+    }
+
     // Handle arrow key navigation
     if (this.isArrowKey(event.key)) {
-      // Don't handle arrow keys if user is editing a clue input or triangle input
-      // But DO handle them for answer cell inputs (cell-input)
-      const activeElement = document.activeElement;
+      // Allow arrow keys in answer cells, but not in other inputs
       if (
-        activeElement?.classList.contains('clue-input') ||
-        activeElement?.classList.contains('triangle-input')
+        this.isEditingInputExceptAnswerCells() ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey
       ) {
         return;
       }
@@ -367,6 +383,88 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
 
   private isArrowKey(key: string): boolean {
     return ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key);
+  }
+
+  private isEditingInputExceptAnswerCells(): boolean {
+    const activeElement = document.activeElement;
+    return !!(
+      activeElement?.classList.contains('clue-input') ||
+      activeElement?.classList.contains('triangle-input') ||
+      activeElement?.classList.contains('title-input') ||
+      (activeElement?.tagName === 'INPUT' &&
+        !activeElement?.classList.contains('cell-input')) ||
+      activeElement?.tagName === 'TEXTAREA' ||
+      activeElement?.getAttribute('contenteditable') === 'true'
+    );
+  }
+
+  private toggleNavigationDirection(): void {
+    const current = this.navigationDirection();
+    const directions: Array<'right' | 'down' | 'left' | 'up'> = [
+      'right',
+      'down',
+      'left',
+      'up',
+    ];
+    const currentIndex = directions.indexOf(current);
+    const nextIndex = (currentIndex + 1) % directions.length;
+    this.navigationDirection.set(directions[nextIndex]);
+
+    // Show a brief visual feedback
+    this.showNavigationDirectionFeedback();
+  }
+
+  private showNavigationDirectionFeedback(): void {
+    // Create a temporary toast-like notification
+    const direction = this.navigationDirection();
+    const messages = {
+      right: 'Navegação: Direita (→)',
+      down: 'Navegação: Baixo (↓)',
+      left: 'Navegação: Esquerda (←)',
+      up: 'Navegação: Cima (↑)',
+    };
+    const message = messages[direction];
+
+    // Remove any existing feedback
+    const existingFeedback = document.querySelector('.navigation-feedback');
+    if (existingFeedback) {
+      existingFeedback.remove();
+    }
+
+    // Create new feedback element
+    const feedback = document.createElement('div');
+    feedback.className = 'navigation-feedback';
+    feedback.textContent = message;
+    feedback.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    `;
+
+    document.body.appendChild(feedback);
+
+    // Animate in
+    setTimeout(() => {
+      feedback.style.opacity = '1';
+    }, 10);
+
+    // Remove after 2 seconds
+    setTimeout(() => {
+      feedback.style.opacity = '0';
+      setTimeout(() => {
+        if (feedback.parentNode) {
+          feedback.parentNode.removeChild(feedback);
+        }
+      }, 200);
+    }, 2000);
   }
 
   private handleArrowKeyNavigation(key: string): void {
@@ -855,19 +953,7 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
     if (event.key.length === 1 && event.key.match(/[a-zA-Z]/)) {
       // Let the input event handle the letter change first
       setTimeout(() => {
-        // Move to the next logical cell (right, then down to next row)
-        const newCol = col + 1;
-        if (newCol < crossword.cols) {
-          // Move right
-          const nextCell = crossword.cells[row][newCol];
-          this.selectedCell.set(nextCell);
-          this.focusCellIfNeeded(nextCell);
-        } else if (row + 1 < crossword.rows) {
-          // Move to beginning of next row
-          const nextCell = crossword.cells[row + 1][0];
-          this.selectedCell.set(nextCell);
-          this.focusCellIfNeeded(nextCell);
-        }
+        this.moveToNextCell(row, col);
       }, 0);
     }
     // Handle backspace - move to previous cell if current cell is empty
@@ -875,24 +961,114 @@ export class CrosswordEditorComponent implements OnInit, OnDestroy {
       const cell = crossword.cells[row][col];
       if (this.crosswordService.isAnswerCell(cell) && !cell.letter) {
         event.preventDefault();
-        // Move to previous cell
-        const newCol = col - 1;
-        if (newCol >= 0) {
-          // Move left
-          const prevCell = crossword.cells[row][newCol];
-          this.selectedCell.set(prevCell);
-          this.focusCellIfNeeded(prevCell);
-          // Clear the previous cell
-          this.clearCell(row, newCol);
-        } else if (row - 1 >= 0) {
-          // Move to end of previous row
-          const prevCell = crossword.cells[row - 1][crossword.cols - 1];
-          this.selectedCell.set(prevCell);
-          this.focusCellIfNeeded(prevCell);
-          // Clear the previous cell
-          this.clearCell(row - 1, crossword.cols - 1);
-        }
+        this.moveToPreviousCell(row, col);
       }
+    }
+  }
+
+  private moveToNextCell(currentRow: number, currentCol: number): void {
+    const crossword = this.crossword();
+    if (!crossword) return;
+
+    const direction = this.navigationDirection();
+    let nextRow = currentRow;
+    let nextCol = currentCol;
+
+    switch (direction) {
+      case 'right':
+        nextCol = currentCol + 1;
+        if (nextCol >= crossword.cols) {
+          nextRow = currentRow + 1;
+          nextCol = 0;
+        }
+        break;
+      case 'down':
+        nextRow = currentRow + 1;
+        if (nextRow >= crossword.rows) {
+          nextCol = currentCol + 1;
+          nextRow = 0;
+        }
+        break;
+      case 'left':
+        nextCol = currentCol - 1;
+        if (nextCol < 0) {
+          nextRow = currentRow + 1;
+          nextCol = crossword.cols - 1;
+        }
+        break;
+      case 'up':
+        nextRow = currentRow - 1;
+        if (nextRow < 0) {
+          nextCol = currentCol + 1;
+          nextRow = crossword.rows - 1;
+        }
+        break;
+    }
+
+    // Check if the new position is valid
+    if (
+      nextRow < crossword.rows &&
+      nextCol < crossword.cols &&
+      nextRow >= 0 &&
+      nextCol >= 0
+    ) {
+      const nextCell = crossword.cells[nextRow][nextCol];
+      this.selectedCell.set(nextCell);
+      this.focusCellIfNeeded(nextCell);
+    }
+  }
+
+  private moveToPreviousCell(currentRow: number, currentCol: number): void {
+    const crossword = this.crossword();
+    if (!crossword) return;
+
+    const direction = this.navigationDirection();
+    let prevRow = currentRow;
+    let prevCol = currentCol;
+
+    switch (direction) {
+      case 'right':
+        prevCol = currentCol - 1;
+        if (prevCol < 0) {
+          prevRow = currentRow - 1;
+          prevCol = crossword.cols - 1;
+        }
+        break;
+      case 'down':
+        prevRow = currentRow - 1;
+        if (prevRow < 0) {
+          prevCol = currentCol - 1;
+          prevRow = crossword.rows - 1;
+        }
+        break;
+      case 'left':
+        prevCol = currentCol + 1;
+        if (prevCol >= crossword.cols) {
+          prevRow = currentRow - 1;
+          prevCol = 0;
+        }
+        break;
+      case 'up':
+        prevRow = currentRow + 1;
+        if (prevRow >= crossword.rows) {
+          prevCol = currentCol - 1;
+          prevRow = 0;
+        }
+        break;
+    }
+
+    // Check if the new position is valid
+    if (
+      prevRow >= 0 &&
+      prevCol >= 0 &&
+      prevRow < crossword.rows &&
+      prevCol < crossword.cols
+    ) {
+      const prevCell = crossword.cells[prevRow][prevCol];
+      this.selectedCell.set(prevCell);
+      this.focusCellIfNeeded(prevCell);
+      // Clear the previous cell
+      this.clearCell(prevRow, prevCol);
     }
   }
 }

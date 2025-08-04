@@ -31,6 +31,22 @@
       }
     </div>
     <div class="header-right">
+      <div class="navigation-indicator">
+        <span class="navigation-label">Navegação:</span>
+        <span
+          class="navigation-direction"
+          [class.right]="navigationDirection() === 'right'"
+          [class.down]="navigationDirection() === 'down'"
+          [class.left]="navigationDirection() === 'left'"
+          [class.up]="navigationDirection() === 'up'"
+          title="Pressione Espaço para alternar"
+        >
+          @switch (navigationDirection()) { @case ('right') { Direita → } @case
+          ('down') { Baixo ↓ } @case ('left') { Esquerda ← } @case ('up') { Cima
+          ↑ } }
+        </span>
+        <span class="keyboard-hint">Espaço</span>
+      </div>
       <div class="save-section">
         @if (saveStatus() === 'saving') {
         <span class="save-status saving">Salvando...</span>

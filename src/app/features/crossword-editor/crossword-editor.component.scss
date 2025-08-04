@@ -80,6 +80,70 @@
 }
 
 .header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  .navigation-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+
+    .navigation-label {
+      font-size: 0.875rem;
+      color: #6c757d;
+      font-weight: 500;
+    }
+
+    .navigation-direction {
+      font-size: 0.875rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+
+      &.right {
+        color: #0066cc;
+        background-color: #e6f3ff;
+      }
+
+      &.down {
+        color: #28a745;
+        background-color: #d4edda;
+      }
+
+      &.left {
+        color: #dc3545;
+        background-color: #f8d7da;
+      }
+
+      &.up {
+        color: #6f42c1;
+        background-color: #e2d9f3;
+      }
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .keyboard-hint {
+      font-size: 0.75rem;
+      color: #6c757d;
+      background-color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      border: 1px solid #dee2e6;
+      font-family: monospace;
+    }
+  }
+
   .save-section {
     display: flex;
     align-items: center;
