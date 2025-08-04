@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { z } from 'zod';
+import { FileUtilsService } from './file-utils.service';
 import { CrosswordGrid } from '../models/crossword.model';
 
 export interface CrosswordFileData {
@@ -113,6 +114,7 @@ const CrosswordFileDataSchema = z.object({
 })
 export class FileManagerService {
   private readonly FILE_VERSION = '1.0.0';
+  private readonly fileUtilsService = inject(FileUtilsService);
 
   /**
    * Salva uma palavra cruzada em arquivo JSON
@@ -133,21 +135,12 @@ export class FileManagerService {
     const blob = new Blob([jsonString], { type: 'application/json' });
 
     // Criar nome do arquivo baseado no título da palavra cruzada
-    const fileName = this.sanitizeFileName(crossword.title) + '.json';
+    const fileName = this.fileUtilsService.generateJsonFileName(
+      crossword.title
+    );
 
-    // Criar link de download
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-
-    // Simular clique para iniciar download
-    document.body.appendChild(link);
-    link.click();
-
-    // Limpar recursos
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    // Trigger download using FileUtilsService
+    this.fileUtilsService.triggerDownload(blob, fileName);
   }
 
   /**
@@ -160,7 +153,7 @@ export class FileManagerService {
         return;
       }
 
-      if (!file.name.toLowerCase().endsWith('.json')) {
+      if (!this.fileUtilsService.validateFileExtension(file, '.json')) {
         reject(
           new Error('Formato de arquivo inválido. Selecione um arquivo .json')
         );
@@ -211,15 +204,5 @@ export class FileManagerService {
 
       reader.readAsText(file);
     });
-  }
-
-  /**
-   * Remove caracteres inválidos do nome do arquivo
-   */
-  private sanitizeFileName(fileName: string): string {
-    return fileName
-      .replace(/[<>:"/\\|?*]/g, '') // Remove caracteres inválidos
-      .replace(/\s+/g, '_') // Substitui espaços por underscore
-      .substring(0, 100); // Limita o tamanho
   }
 }

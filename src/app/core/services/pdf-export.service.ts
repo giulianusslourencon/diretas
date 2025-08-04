@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import jsPDF from 'jspdf';
 import {
   CrosswordGrid,
@@ -8,11 +8,13 @@ import { PdfConfig } from '../config/pdf-config';
 import { CanvasUtils } from '../utils/canvas-utils';
 import { FooterRenderer } from '../utils/footer-renderer';
 import { CellElementFactory } from '../utils/cell-element-factory';
+import { FileUtilsService } from './file-utils.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class PdfExportService {
+  private readonly fileUtilsService = inject(FileUtilsService);
   async exportCrosswordToPdf(
     crossword: CrosswordGrid,
     options: CrosswordExportOptions = {
@@ -37,16 +39,14 @@ export class PdfExportService {
         await this.createSingleLayoutPdf(pdf, crossword, options);
       }
 
-      const fileName = this.generateFileName(crossword.title);
+      const fileName = this.fileUtilsService.generatePdfFileName(
+        crossword.title
+      );
       pdf.save(fileName);
     } catch (error) {
       console.error('Error exporting crossword to PDF:', error);
       throw new Error('Failed to export crossword to PDF');
     }
-  }
-
-  private generateFileName(title: string): string {
-    return `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_crossword.pdf`;
   }
 
   private async createSingleLayoutPdf(
